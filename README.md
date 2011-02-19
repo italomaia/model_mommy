@@ -131,7 +131,15 @@ If the generator requires a attribute of field as argument, you could do somethi
     gen_name_from_default = lambda default_value:default_value
     gen_name_from_default.required = ['default']
 
+## For contributors
+
+If you want to contribute with model_mommy, fork the project. Here are a few guidelines for you:
+ 
+ * Write tests for all code you commit (untested code might be refused)
+ * Check your tests coverage
+ * Follow pep8 guidelines
+
 For more examples, see tests.
 
 ##Currently supports the fields:
-CharField, TextField, FloatField, ForeignKey, Date and DateTimeField, BooleanField, and all the integer-type Fields
+CharField, TextField, FloatField, ForeignKey, ManyToMany Date and DateTimeField, BooleanField, and all the integer-type Fields
