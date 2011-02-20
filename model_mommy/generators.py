@@ -63,8 +63,22 @@ gen_date = datetime.date.today
 gen_datetime = datetime.datetime.now
 
 
+def gen_raw_string(max_length, chr_table):
+    '''
+    Generates a random string from `chr_table` with 
+    size `max_length`.
+    '''
+    return ''.join(choice(chr_table) for i in range(max_length))
+
+
+def gen_slug(max_length=50):
+    slug_table = string.lower_case + string.digits + '_-'
+    return gen_raw_string(max_length, slug_table)
+gen_string.required = ['max_length']
+
+
 def gen_string(max_length):
-    return ''.join(choice(string.printable) for i in range(max_length))
+    return gen_raw_string(max_length, string.printable)
 gen_string.required = ['max_length']
 
 

@@ -129,7 +129,6 @@ class Mommy(object):
 
         instance = self.model(**attrs)
 
-        # m2m only works for persisted instances
         if commit:
             instance.save()
 
@@ -177,7 +176,6 @@ def get_required_values(generator, field):
     If required value is a string, simply fetch the value from the field
     and returns.
     '''
-    #FIXME: avoid abreviations
     rt = {}
     if hasattr(generator, 'required'):
         for item in generator.required:

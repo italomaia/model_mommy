@@ -43,6 +43,19 @@ class Store(models.Model):
 
 class Penguin(models.Model):
     partner = models.OneToOneField('self')
+    parcel = models.ManyToManyField('self')
+
+
+class DummySlugModel(models.Model):
+    slug = models.SlugField()
+
+
+class DummyUrlModel(models.Model):
+    url = models.URLField()
+
+
+class DummyEmailModel(models.Model):
+    email = models.EmailField()
 
 
 class DummyIntModel(models.Model):

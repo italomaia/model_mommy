@@ -3,6 +3,7 @@ from datetime import date, datetime
 from decimal import Decimal
 
 from django.db.models.fields import AutoField, CharField, TextField
+from django.db.models.fields import SlugField, URLField, EmailField
 from django.db.models.fields import DateField, DateTimeField
 from django.db.models.fields import IntegerField, SmallIntegerField
 from django.db.models.fields import PositiveSmallIntegerField
@@ -50,7 +51,7 @@ class FieldFillingWithParameterTestCase(TestCase):
         self.assertEqual(person.name, 'John')
         self.assertEqual(person.gender, 'M')
 
-class TestCustomGenerators(TestCase):
+class TestNonDefaultGenerators(TestCase):
 
     def test_attr_mapping_with_from_default_generator(self):
         from model_mommy.generators import gen_from_default
@@ -232,6 +233,11 @@ class MommyCreatesAssociatedModels(TestCase):
         self.assertEqual(store.customers.count(), 5)
 
 
+class TestAutoRefPattern(TestCase):
+    'Spooky!'
+    pass
+
+
 class FillNullablesTestCase(TestCase):
 
     def test_always_fill_nullables_if_value_provided_via_attrs(self):
@@ -268,7 +274,36 @@ class FillingFromChoice(FieldFillingTestCase):
         self.assertTrue(self.person.gender in map(lambda x: x[0], GENDER_CH))
 
 
+class FillingEmailField():
+    
+    def is_email(self, data):
+        pass
+
+    def test_create_model_with_email_field(self):
+        from model_mommy.models import DummyEmailModel
+        from model_mommy import mommy
+        
+        dummy_email_model = mommy.make_one(DummyEmailModel)
+        self.assert(isinstance(dummy_email_model.email, basestring))
+
+    def test_if_url_generator_generates_valid_email(self):
+        from model_mommy.models import DummyEmailModel
+        from model_mommy import mommy
+        
+        dummy_email_model = mommy.make_one(DummyEmailModel)
+        self.assertTrue(self.is_email(dummy_email_model.email))
+
+
+class FileFieldsFilling(TestCase):
+
+    def test_create_model_with_file_field(self):
+        pass
+
+
 class StringFieldsFilling(FieldFillingTestCase):
+
+    def test_fill_SlugField_with_random_slug(self):
+        pass
 
     def test_fill_CharField_with_a_random_str(self):
         from model_mommy.models import Person
@@ -417,7 +452,7 @@ class FillingOthersNumericFields(TestCase):
             self.dummy_decimal_model.decimal_field, basestring))
 
 
-class HandlingUnsupportedModels(TestCase):
+class HandlingModelsWithUnsupportedFields(TestCase):
 
     def test_unsupported_model_raises_an_explanatory_exception(self):
         from model_mommy import mommy
