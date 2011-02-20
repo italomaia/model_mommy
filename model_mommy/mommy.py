@@ -2,9 +2,11 @@
 from django.db.models.fields import AutoField, CharField, TextField
 from django.db.models.fields import DateField, DateTimeField
 from django.db.models.fields import IntegerField, SmallIntegerField
-from django.db.models.fields import PositiveSmallIntegerField, PositiveIntegerField
+from django.db.models.fields import PositiveSmallIntegerField
+from django.db.models.fields import PositiveIntegerField
 from django.db.models.fields import FloatField, DecimalField
 from django.db.models.fields import BooleanField
+from django.db.models.fields import URLField, SlugField
 
 try:
     from django.db.models.fields import BigIntegerField
@@ -24,6 +26,7 @@ import sys
 #TODO: improve related models handling
 foreign_key_required = [lambda field: ('model', field.related.parent_model)]
 
+
 def make_one(model, **attrs):
     """
     Creates a persisted instance from a given model its associated models.
@@ -33,45 +36,53 @@ def make_one(model, **attrs):
     mommy = Mommy(model)
     return mommy.make_one(**attrs)
 
+
 def prepare_one(model, **attrs):
     """
-    Creates a BUT DOESN'T persist an instance from a given model its associated models.
+    Creates a BUT DOESN'T persist an instance from a given model
+    its associated models.
     It fill the fields with random values or you can specify
     which fields you want to define its values by yourself.
     """
     mommy = Mommy(model)
     return mommy.prepare(**attrs)
 
+
 def make_many(model, qty=5, **attrs):
     mommy = Mommy(model)
     return [mommy.make_one() for i in range(qty)]
+
 
 make_one.required = foreign_key_required
 prepare_one.required = foreign_key_required
 make_many.required = foreign_key_required
 
 default_mapping = {
-    BooleanField:generators.gen_boolean,
-    IntegerField:generators.gen_integer,
-    BigIntegerField:generators.gen_integer,
-    SmallIntegerField:generators.gen_integer,
+    BooleanField: generators.gen_boolean,
+    IntegerField: generators.gen_integer,
+    BigIntegerField: generators.gen_integer,
+    SmallIntegerField: generators.gen_integer,
 
-    PositiveIntegerField:lambda: generators.gen_integer(0),
-    PositiveSmallIntegerField:lambda: generators.gen_integer(0),
+    PositiveIntegerField: lambda: generators.gen_integer(0),
+    PositiveSmallIntegerField: lambda: generators.gen_integer(0),
 
-    FloatField:generators.gen_float,
-    DecimalField:generators.gen_decimal,
+    FloatField: generators.gen_float,
+    DecimalField: generators.gen_decimal,
 
-    CharField:generators.gen_string,
-    TextField:generators.gen_text,
+    SlugField: generators.gen_slug,
+    CharField: generators.gen_string,
+    TextField: generators.gen_text,
 
-    ForeignKey:make_one,
+    ForeignKey: make_one,
     #OneToOneField:make_one,
-    ManyToManyField:make_many,
+    ManyToManyField: make_many,
 
-    DateField:generators.gen_date,
-    DateTimeField:generators.gen_date,
+    DateField: generators.gen_date,
+    DateTimeField: generators.gen_date,
+
+    URLField: generators.gen_url,
 }
+
 
 class Mommy(object):
     attr_mapping = {}
@@ -95,55 +106,59 @@ class Mommy(object):
         return self._make_one(commit=False, **attrs)
 
     def get_fields(self):
-        return self.model._meta.fields+self.model._meta.many_to_many
+        return self.model._meta.fields + self.model._meta.many_to_many
 
     def _make_one(self, commit=True, **attrs):
         m2m_dict = {}
-        
+
         for field in self.get_fields():
             if isinstance(field, AutoField):
                 continue
-            
+
             if isinstance(field, ManyToManyField):
                 # default value was not informed
-                if field.name not in attrs: 
+                if field.name not in attrs:
                     if field.null and not self.fill_nullables:
-                        continue # do not populate
-                    else: 
+                        continue  # do not populate
+                    else:
                         m2m_dict[field.name] = self.generate_value(field)
-                else: 
+                else:
                     m2m_dict[field.name] = attrs.pop(field.name)
-            
+
             elif field.name not in attrs:
                 if field.null and not self.fill_nullables:
                     continue
                 else:
                     attrs[field.name] = self.generate_value(field)
-        
+
         instance = self.model(**attrs)
-        
-        # m2m only works for persisted instances
+
         if commit:
             instance.save()
-            
+
             # m2m relation is treated differently
             for key, value in m2m_dict.items():
                 m2m_relation = getattr(instance, key)
+
                 for model_instance in value:
                     m2m_relation.add(model_instance)
 
         return instance
 
     def generate_value(self, field):
-        '''Calls the generator associated with a field passing all required args.
+        '''Calls the generator associated with a field passing all
+        required args.
 
         Generator Resolution Precedence Order:
         -- attr_mapping - mapping per attribute name
         -- choices -- mapping from avaiable field choices
-        -- type_mapping - mapping from user defined type associated generators
-        -- default_mapping - mapping from pre-defined type associated generators
+        -- type_mapping - mapping from user defined type associated
+        generators
+        -- default_mapping - mapping from pre-defined type associated
+        generators
 
-        `attr_mapping` and `type_mapping` can be defined easely overwriting the model.
+        `attr_mapping` and `type_mapping` can be defined easely
+        overwriting the model.
         '''
         if field.name in self.attr_mapping:
             generator = self.attr_mapping[field.name]
@@ -151,9 +166,12 @@ class Mommy(object):
             generator = generators.gen_from_choices(field.choices)
         elif field.__class__ in self.type_mapping:
             generator = self.type_mapping[field.__class__]
+        else:
+            raise TypeError('%s is not supported by mommy.' % field.__class__)
 
         required_fields = get_required_values(generator, field)
         return generator(**required_fields)
+
 
 def get_required_values(generator, field):
     '''
@@ -162,18 +180,18 @@ def get_required_values(generator, field):
     If required value is a string, simply fetch the value from the field
     and returns.
     '''
-    #FIXME: avoid abreviations
     rt = {}
     if hasattr(generator, 'required'):
         for item in generator.required:
 
-            if callable(item): # mommy can deal with the nasty hacking too!
+            if callable(item):  # mommy can deal with the nasty hacking too!
                 key, value = item(field)
                 rt[key] = value
 
             elif isinstance(item, basestring):
                 rt[item] = getattr(field, item)
-            
-            else: raise ValueError("Required value '%s' is of wrong type. Don't make mommy sad." % str(item))
+            else:
+                raise ValueError("Required value '%s'"
+                " is of wrong type. Don't make mommy sad." % str(item))
 
     return rt
