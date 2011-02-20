@@ -16,6 +16,16 @@ except ImportError:
 
 from django.test import TestCase
 
+
+class TestDjangoVersinoIssues(TestCase):
+    def test_if_bigintegerfield_works_for_v1_1(self):
+        import django
+        if django.VERSION < '1.2':
+            self.assertEqual(BigIntegerField, IntegerField)
+        else:
+            self.assertNotEqual(BigIntegerField, IntegerField)
+
+
 class FieldFillingTestCase(TestCase):
 
     def setUp(self):
@@ -315,7 +325,6 @@ class FillingIntFields(TestCase):
         self.assertTrue(isinstance(int_field, IntegerField))
 
         self.assertTrue(isinstance(self.dummy_int_model.int_field, int))
-
     
     def test_fill_BigIntegerField_with_a_random_number(self):
         from model_mommy.models import DummyIntModel
