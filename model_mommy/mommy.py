@@ -136,6 +136,7 @@ class Mommy(object):
             # m2m relation is treated differently
             for key, value in m2m_dict.items():
                 m2m_relation = getattr(instance, key)
+
                 for model_instance in value:
                     m2m_relation.add(model_instance)
 

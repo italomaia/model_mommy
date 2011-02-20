@@ -1,4 +1,4 @@
-#coding: utf-8
+# -*- coding: utf-8 -*-
 
 #######################################
 # TESTING PURPOSE ONLY MODELS!!       #
@@ -25,6 +25,11 @@ class Person(models.Model):
     wanted_games_qtd = models.BigIntegerField()
 
 
+class DriverLicense(models.Model):
+    photo = models.ImageField(upload_to="uploads/mommy/photos/")
+    doc = models.FileField(upload_to="uploads/mommy/docs/")
+
+
 class Dog(models.Model):
     owner = models.ForeignKey('Person')
     breed = models.CharField(max_length=50)
@@ -34,6 +39,10 @@ class Store(models.Model):
     customers = models.ManyToManyField(Person, related_name='favorite_stores',
         blank=True, null=True)
     employees = models.ManyToManyField(Person, related_name='employers')
+
+
+class Penguin(models.Model):
+    partner = models.OneToOneField(Penquin)
 
 
 class DummyIntModel(models.Model):
