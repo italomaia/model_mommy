@@ -6,6 +6,7 @@ from django.db.models.fields import PositiveSmallIntegerField
 from django.db.models.fields import PositiveIntegerField
 from django.db.models.fields import FloatField, DecimalField
 from django.db.models.fields import BooleanField
+from django.db.models.fields import URLField, SlugField
 
 try:
     from django.db.models.fields import BigIntegerField
@@ -68,6 +69,7 @@ default_mapping = {
     FloatField: generators.gen_float,
     DecimalField: generators.gen_decimal,
 
+    SlugField: generators.gen_slug,
     CharField: generators.gen_string,
     TextField: generators.gen_text,
 
@@ -77,6 +79,8 @@ default_mapping = {
 
     DateField: generators.gen_date,
     DateTimeField: generators.gen_date,
+
+    URLField: generators.gen_url,
 }
 
 
@@ -191,4 +195,3 @@ def get_required_values(generator, field):
                 " is of wrong type. Don't make mommy sad." % str(item))
 
     return rt
-

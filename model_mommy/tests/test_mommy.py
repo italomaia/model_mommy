@@ -10,6 +10,7 @@ from django.db.models.fields import PositiveSmallIntegerField
 from django.db.models.fields import PositiveIntegerField
 from django.db.models.fields import FloatField, DecimalField
 from django.db.models.fields import BooleanField
+from django.db.models.fields import URLField
 
 try:
     from django.db.models.fields import BigIntegerField
@@ -51,6 +52,7 @@ class FieldFillingWithParameterTestCase(TestCase):
         self.assertEqual(person.name, 'John')
         self.assertEqual(person.gender, 'M')
 
+
 class TestNonDefaultGenerators(TestCase):
 
     def test_attr_mapping_with_from_default_generator(self):
@@ -60,7 +62,7 @@ class TestNonDefaultGenerators(TestCase):
 
         class HappyPersonMommy(Mommy):
             attr_mapping = {'happy': gen_from_default}
-        
+
         happy_field = Person._meta.get_field('happy')
         mom = HappyPersonMommy(Person)
         person = mom.make_one()
@@ -233,6 +235,15 @@ class MommyCreatesAssociatedModels(TestCase):
         self.assertEqual(store.customers.count(), 5)
 
 
+class HandlingModelsWithUnsupportedFields(TestCase):
+
+    def test_unsupported_model_raises_an_explanatory_exception(self):
+        from model_mommy import mommy
+        from model_mommy.models import UnsupportedModel
+
+        self.assertRaises(TypeError, lambda: mommy.make_one(UnsupportedModel))
+
+
 class TestAutoRefPattern(TestCase):
     'Spooky!'
     pass
@@ -275,21 +286,18 @@ class FillingFromChoice(FieldFillingTestCase):
 
 
 class FillingEmailField():
-    
-    def is_email(self, data):
-        pass
 
     def test_create_model_with_email_field(self):
         from model_mommy.models import DummyEmailModel
         from model_mommy import mommy
-        
+
         dummy_email_model = mommy.make_one(DummyEmailModel)
-        self.assert(isinstance(dummy_email_model.email, basestring))
+        self.assertTrue(isinstance(dummy_email_model.email, basestring))
 
     def test_if_url_generator_generates_valid_email(self):
         from model_mommy.models import DummyEmailModel
         from model_mommy import mommy
-        
+
         dummy_email_model = mommy.make_one(DummyEmailModel)
         self.assertTrue(self.is_email(dummy_email_model.email))
 
@@ -300,10 +308,35 @@ class FileFieldsFilling(TestCase):
         pass
 
 
-class StringFieldsFilling(FieldFillingTestCase):
+class TestSlugFieldFilling(TestCase):
 
-    def test_fill_SlugField_with_random_slug(self):
-        pass
+    def is_slug(self, slug):
+        import string
+
+        slug_table = string.lowercase + string.digits + '_-'
+        for char in slug:
+            if char not in slug_table:
+                return False
+        return True
+
+    def test_fill_slugfield_with_random_slug(self):
+        from model_mommy.models import DummySlugModel
+        from model_mommy import mommy
+
+        dummy_slug_model = mommy.make_one(DummySlugModel)
+        self.assertTrue(
+            isinstance(dummy_slug_model.slug, basestring))
+
+    def test_if_slug_for_slugfield_is_generated_correctly(self):
+        from model_mommy.models import DummySlugModel
+        from model_mommy import mommy
+
+        dummy_slug_model = mommy.make_one(DummySlugModel)
+        self.assertTrue(
+            self.is_slug(dummy_slug_model.slug))
+
+
+class StringFieldsFilling(FieldFillingTestCase):
 
     def test_fill_CharField_with_a_random_str(self):
         from model_mommy.models import Person
@@ -452,10 +485,12 @@ class FillingOthersNumericFields(TestCase):
             self.dummy_decimal_model.decimal_field, basestring))
 
 
-class HandlingModelsWithUnsupportedFields(TestCase):
+class URLFieldsFilling(FieldFillingTestCase):
 
-    def test_unsupported_model_raises_an_explanatory_exception(self):
-        from model_mommy import mommy
-        from model_mommy.models import UnsupportedModel
-        
-        self.assertRaises(TypeError, lambda: mommy.make_one(UnsupportedModel))
+    def test_fill_URLField_with_valid_url(self):
+        from model_mommy.models import Person
+
+        blog_field = Person._meta.get_field('blog')
+
+        self.assertTrue(isinstance(blog_field, URLField))
+        self.assertTrue(isinstance(self.person.blog, basestring))

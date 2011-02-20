@@ -23,11 +23,7 @@ class Person(models.Model):
     birthday = models.DateField()
     appointment = models.DateTimeField()
     wanted_games_qtd = models.BigIntegerField()
-
-
-class DriverLicense(models.Model):
-    photo = models.ImageField(upload_to="uploads/mommy/photos/")
-    doc = models.FileField(upload_to="uploads/mommy/docs/")
+    blog = models.URLField()
 
 
 class Dog(models.Model):
@@ -76,11 +72,12 @@ class DummyNumbersModel(models.Model):
 class DummyDecimalModel(models.Model):
     decimal_field = models.DecimalField(max_digits=5, decimal_places=2)
 
+
 class UnsupportedField(models.Field):
     description = "I'm bad company, mommy doesn't know me"
     def __init__(self, *args, **kwargs):
         super(UnsupportedField, self).__init__(*args, **kwargs)
 
+
 class UnsupportedModel(models.Model):
     unsupported_field = UnsupportedField()
-

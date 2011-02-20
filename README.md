@@ -142,4 +142,6 @@ If you want to contribute with model_mommy, fork the project. Here are a few gui
 For more examples, see tests.
 
 ##Currently supports the fields:
-CharField, TextField, FloatField, ForeignKey, ManyToMany Date and DateTimeField, BooleanField, and all the integer-type Fields
+
+SlugField, CharField, TextField, URLField, FloatField, ForeignKey, ManyToMany, 
+Date and DateTimeField, BooleanField, and all the integer-type Fields
