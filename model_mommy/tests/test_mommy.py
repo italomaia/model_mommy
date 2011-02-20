@@ -264,6 +264,7 @@ class FillingFromChoice(FieldFillingTestCase):
 
     def test_if_gender_is_populated_from_choices(self):
         from model_mommy.models import GENDER_CH
+
         self.assertTrue(self.person.gender in map(lambda x: x[0], GENDER_CH))
 
 
@@ -288,6 +289,7 @@ class StringFieldsFilling(FieldFillingTestCase):
 
 
 class BooleanFieldsFilling(FieldFillingTestCase):
+
     def test_fill_BooleanField_with_boolean(self):
         from model_mommy.models import Person
 
@@ -391,6 +393,7 @@ class FillingPositiveIntFields(TestCase):
 
 
 class FillingOthersNumericFields(TestCase):
+
     def test_filling_FloatField_with_a_random_float(self):
         from model_mommy import mommy
         from model_mommy.models import DummyNumbersModel
@@ -415,12 +418,9 @@ class FillingOthersNumericFields(TestCase):
 
 
 class HandlingUnsupportedModels(TestCase):
+
     def test_unsupported_model_raises_an_explanatory_exception(self):
         from model_mommy import mommy
         from model_mommy.models import UnsupportedModel
-
-        try: # TODO
-            mommy.make_one(UnsupportedModel)
-            self.fail("Should have raised a TypeError")
-        except TypeError, e:
-            self.assertTrue('not supported' in repr(e))
+        
+        self.assertRaises(TypeError, lambda: mommy.make_one(UnsupportedModel))
