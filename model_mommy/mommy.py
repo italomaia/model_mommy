@@ -5,7 +5,7 @@ from django.db.models.fields import IntegerField, SmallIntegerField
 from django.db.models.fields import PositiveSmallIntegerField
 from django.db.models.fields import PositiveIntegerField
 from django.db.models.fields import FloatField, DecimalField
-from django.db.models.fields import BooleanField
+from django.db.models.fields import BooleanField, EmailField
 from django.db.models.fields import URLField, SlugField
 
 try:
@@ -81,6 +81,7 @@ default_mapping = {
     DateTimeField: generators.gen_date,
 
     URLField: generators.gen_url,
+    EmailField: generators.gen_email,
 }
 
 

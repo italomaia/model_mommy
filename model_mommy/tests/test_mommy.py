@@ -10,7 +10,7 @@ from django.db.models.fields import PositiveSmallIntegerField
 from django.db.models.fields import PositiveIntegerField
 from django.db.models.fields import FloatField, DecimalField
 from django.db.models.fields import BooleanField
-from django.db.models.fields import URLField
+from django.db.models.fields import URLField, EmailField
 
 try:
     from django.db.models.fields import BigIntegerField
@@ -494,3 +494,13 @@ class URLFieldsFilling(FieldFillingTestCase):
 
         self.assertTrue(isinstance(blog_field, URLField))
         self.assertTrue(isinstance(self.person.blog, basestring))
+
+
+class EmailFieldsFilling(FieldFillingTestCase):
+    
+    def test_fill_EmailField_with_random_valid_email(self):
+        from model_mommy.models import Person
+        
+        email_field = Person._meta.get_field('email')
+        self.assertTrue(isinstance(email_field, EmailField))
+        self.assertTrue(isinstance(self.person.email, basestring))

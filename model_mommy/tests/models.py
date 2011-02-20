@@ -24,6 +24,7 @@ class Person(models.Model):
     appointment = models.DateTimeField()
     wanted_games_qtd = models.BigIntegerField()
     blog = models.URLField()
+    email = models.EmailField()
 
 
 class Dog(models.Model):
