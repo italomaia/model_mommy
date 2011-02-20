@@ -42,7 +42,7 @@ class Store(models.Model):
 
 
 class Penguin(models.Model):
-    partner = models.OneToOneField(Penquin)
+    partner = models.OneToOneField('self')
 
 
 class DummyIntModel(models.Model):
@@ -62,3 +62,12 @@ class DummyNumbersModel(models.Model):
 
 class DummyDecimalModel(models.Model):
     decimal_field = models.DecimalField(max_digits=5, decimal_places=2)
+
+class UnsupportedField(models.Field):
+    description = "I'm bad company, mommy doesn't know me"
+    def __init__(self, *args, **kwargs):
+        super(UnsupportedField, self).__init__(*args, **kwargs)
+
+class UnsupportedModel(models.Model):
+    unsupported_field = UnsupportedField()
+

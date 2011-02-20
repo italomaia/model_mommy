@@ -163,6 +163,8 @@ class Mommy(object):
             generator = generators.gen_from_choices(field.choices)
         elif field.__class__ in self.type_mapping:
             generator = self.type_mapping[field.__class__]
+        else:
+            raise TypeError('%s is not supported by mommy.' % field.__class__)
 
         required_fields = get_required_values(generator, field)
         return generator(**required_fields)
@@ -186,9 +188,9 @@ def get_required_values(generator, field):
 
             elif isinstance(item, basestring):
                 rt[item] = getattr(field, item)
-
             else:
                 raise ValueError("Required value '%s'"
                 " is of wrong type. Don't make mommy sad." % str(item))
 
     return rt
+

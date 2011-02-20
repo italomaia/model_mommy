@@ -412,3 +412,15 @@ class FillingOthersNumericFields(TestCase):
         self.assertTrue(isinstance(decimal_field, DecimalField))
         self.assertTrue(isinstance(
             self.dummy_decimal_model.decimal_field, basestring))
+
+
+class HandlingUnsupportedModels(TestCase):
+    def test_unsupported_model_raises_an_explanatory_exception(self):
+        from model_mommy import mommy
+        from model_mommy.models import UnsupportedModel
+
+        try: # TODO
+            mommy.make_one(UnsupportedModel)
+            self.fail("Should have raised a TypeError")
+        except TypeError, e:
+            self.assertTrue('not supported' in repr(e))
