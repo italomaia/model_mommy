@@ -93,3 +93,47 @@ def gen_url(max_length=200):
     letters = ''.join(choice(string.letters) for i in range(max_length - 15))
     return 'http://www.%s.com' % letters
 gen_url.required = ['max_length']
+
+
+def gen_email(max_length=75):
+    # ref: http://en.wikipedia.org/wiki/Email_address
+    # local-part: up to 64char
+    # domain-part: up to 253char
+    # total: up to 254char
+
+    assert max_length >= 3
+    max_length = min(max_length, 254) - 1 # -> @
+    local_length = choice(range(1, min(max_length, 65)))
+    domain_length = min(max_length - local_length, 253)
+    email = '%s@%s'
+
+    def gen_local_part(length):
+        char_table_cc = string.letters + string.digits + "!#$%&'*+-/=?^_`{|}~"
+        char_table_nc = string.letters + string.digits + "!#$%&'*+-/=?^_`{|}~."
+
+        data = gen_raw_string(1, char_table_cc)
+        while len(data) < length:
+            if data[-1] == '.' or len(data) + 1 == length:
+                data += gen_raw_string(1, char_table_cc)
+            else:
+                data += gen_raw_string(1, char_table_nc)
+        return data
+
+    def gen_domain_part(length):
+        char_table_cc = string.letters + string.digits + '-_'
+        char_table_nc = string.letters + string.digits + '-_.'
+        count = 0
+
+        data = gen_raw_string(1, char_table_cc)
+        while len(data) < length:
+            if data[-1] == '.' or len(data) + 1 == length or count == 63:
+                data += gen_raw_string(1, char_table_cc)
+                count = 0
+            else:
+                data += gen_raw_string(1, char_table_nc)
+                count += 1
+        return data
+
+    return email % (
+        gen_local_part(local_length),
+        gen_domain_part(domain_length))
