@@ -43,16 +43,32 @@ class Penguin(models.Model):
     parcel = models.ManyToManyField('self')
 
 
+class DummyDateModel(models.Model):
+    date_field = models.DateField()
+
+
+class DummyDateTimeModel(models.Model):
+    datetime_field = models.DateTimeField()
+
+
 class DummySlugModel(models.Model):
-    slug = models.SlugField()
+    slug_field = models.SlugField()
 
 
-class DummyUrlModel(models.Model):
-    url = models.URLField()
+class DummyCharModel(models.Model):
+    char_field = models.CharField(max_length=255)
+
+
+class DummyTextModel(models.Model):
+    text_field = models.TextField()
+
+
+class DummyURLModel(models.Model):
+    url_field = models.URLField()
 
 
 class DummyEmailModel(models.Model):
-    email = models.EmailField()
+    email_field = models.EmailField()
 
 
 class DummyIntModel(models.Model):
@@ -72,6 +88,10 @@ class DummyNumbersModel(models.Model):
 
 class DummyDecimalModel(models.Model):
     decimal_field = models.DecimalField(max_digits=5, decimal_places=2)
+
+
+class DummyBooleanModel(models.Model):
+    boolean_field = models.BooleanField()
 
 
 class UnsupportedField(models.Field):
