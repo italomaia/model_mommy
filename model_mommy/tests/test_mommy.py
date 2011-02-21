@@ -15,7 +15,7 @@ from django.test import TestCase
 class TestDjangoVersinoIssues(TestCase):
     def test_if_bigintegerfield_works_for_v1_1(self):
         import django
-        if django.VERSION < '1.2':
+        if django.VERSION < (1, 2):
             self.assertEqual(BigIntegerField, IntegerField)
         else:
             self.assertNotEqual(BigIntegerField, IntegerField)
