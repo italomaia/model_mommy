@@ -71,14 +71,32 @@ def gen_raw_string(max_length, chr_table):
     return ''.join(choice(chr_table) for i in range(max_length))
 
 
+def gen_filename(max_length=100, ext='txt'):
+    '''
+    Generates a random filename with length up to `max_length` and
+    extension `ext`.
+    '''
+    txt_length = choice(range(1, max_length - len(ext)))
+    ext = '.%s' % txt
+    return gen_raw_string(txt_length, string.letters + '-_') + ext
+
+
 def gen_slug(max_length=50):
+    '''
+    Generates a random slug with length up to `max_length`.
+    '''
     slug_table = string.lowercase + string.digits + '_-'
-    return gen_raw_string(max_length, slug_table)
+    txt_length = choice(range(1, max_length+1))
+    return gen_raw_string(txt_length, slug_table)
 gen_slug.required = ['max_length']
 
 
 def gen_string(max_length):
-    return gen_raw_string(max_length, string.printable)
+    '''
+    Generates a random string with length up to `max_length`.
+    '''
+    txt_length = choice(range(1, max_length+1))
+    return gen_raw_string(txt_length, string.printable)
 gen_string.required = ['max_length']
 
 

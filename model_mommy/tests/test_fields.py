@@ -61,13 +61,8 @@ class TestFillingStringFields(TestCase):
         self.assertTrue(isinstance(char_field, CharField))
 
         dummy_char_model = mommy.make_one(DummyCharModel)
-
         self.assertTrue(
             isinstance(dummy_char_model.char_field, basestring))
-
-        # this is enforced by the generator
-        self.assertEqual(
-            len(dummy_char_model.char_field), char_field.max_length)
 
     def test_create_model_with_TextField(self):
         from model_mommy import mommy

@@ -94,6 +94,14 @@ class DummyBooleanModel(models.Model):
     boolean_field = models.BooleanField()
 
 
+class DummyFileModel(models.Model):
+    file_field = models.FileField(upload_to='uploads')
+
+
+class DummyImageModel(models.Model):
+    image_field = models.FileField(upload_to='images')
+
+
 class UnsupportedField(models.Field):
     description = "I'm bad company, mommy doesn't know me"
     def __init__(self, *args, **kwargs):
