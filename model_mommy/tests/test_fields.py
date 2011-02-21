@@ -4,7 +4,7 @@ from django.test import TestCase
 
 import django
 
-if django.VERSION < '1.2':
+if django.VERSION < (1, 2):
     BigIntegerField = IntegerField
 
 

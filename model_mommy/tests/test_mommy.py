@@ -1,20 +1,12 @@
 # -*- coding:utf-8 -*-
+
 from datetime import date, datetime
 from decimal import Decimal
 
-from django.db.models.fields import AutoField, CharField, TextField
-from django.db.models.fields import SlugField, URLField, EmailField
-from django.db.models.fields import DateField, DateTimeField
-from django.db.models.fields import IntegerField, SmallIntegerField
-from django.db.models.fields import PositiveSmallIntegerField
-from django.db.models.fields import PositiveIntegerField
-from django.db.models.fields import FloatField, DecimalField
-from django.db.models.fields import BooleanField
-from django.db.models.fields import URLField, EmailField
+import django
+from django.db.models.fields import *
 
-try:
-    from django.db.models.fields import BigIntegerField
-except ImportError:
+if django.VERSION < (1, 2):
     BigIntegerField = IntegerField
 
 from django.test import TestCase
