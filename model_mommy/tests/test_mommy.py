@@ -3,8 +3,8 @@
 from datetime import date, datetime
 from decimal import Decimal
 
-import django
 from django.db.models.fields import *
+import django
 
 if django.VERSION < (1, 2):
     BigIntegerField = IntegerField
@@ -14,7 +14,8 @@ from django.test import TestCase
 
 class TestDjangoVersinoIssues(TestCase):
     def test_if_bigintegerfield_works_for_v1_1(self):
-        import django
+        from model_mommy.models import BigIntegerField
+
         if django.VERSION < (1, 2):
             self.assertEqual(BigIntegerField, IntegerField)
         else:
@@ -252,7 +253,7 @@ class FillNullablesTestCase(TestCase):
         p = mom.make_one(bio=bio_data)
         self.assertEqual(p.bio, bio_data)
 
-    def test_fill_nullables_if_fill_nullables_is_true(self):
+    def test_if_nullables_are_filled_when_fill_nullables_is_true(self):
         from model_mommy.mommy import Mommy
         from model_mommy.models import Person
 
@@ -260,7 +261,7 @@ class FillNullablesTestCase(TestCase):
         p = mom.make_one()
         self.assertTrue(isinstance(p.bio, basestring))
 
-    def test_do_not_fill_nullables_if_fill_nullables_is_false(self):
+    def test_if_nullables_are_not_filled_when_fill_nullables_is_false(self):
         from model_mommy.mommy import Mommy
         from model_mommy.models import Person
 

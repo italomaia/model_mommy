@@ -1,26 +1,20 @@
-# -*- coding: utf-8 -*-
-from django.db.models.fields import AutoField, CharField, TextField
-from django.db.models.fields import DateField, DateTimeField
-from django.db.models.fields import IntegerField, SmallIntegerField
-from django.db.models.fields import PositiveSmallIntegerField
-from django.db.models.fields import PositiveIntegerField
-from django.db.models.fields import FloatField, DecimalField
-from django.db.models.fields import BooleanField, EmailField
-from django.db.models.fields import URLField, SlugField
-
-try:
-    from django.db.models.fields import BigIntegerField
-except ImportError:
-    BigIntegerField = IntegerField
-
-from django.db.models import ForeignKey, OneToOneField, ManyToManyField
+# -*- coding:utf-8 -*-
 
 from string import letters
 from random import choice, randint
 from datetime import date
 from decimal import Decimal
-import generators
 import sys
+
+from django.db.models.fields import *
+from django.db.models.fields.related import *
+from django.db.models.fields.files import *
+import django
+
+if django.VERSION < (1, 2):
+    BigIntegerField = IntegerField
+
+import generators
 
 
 #TODO: improve related models handling
@@ -82,6 +76,8 @@ default_mapping = {
 
     URLField: generators.gen_url,
     EmailField: generators.gen_email,
+
+    FileField: generators.gen_filename,
 }
 
 

@@ -6,49 +6,53 @@
 #######################################
 
 from django.db import models
+from django.db.models.fields import *
+from django.db.models.fields.related import *
+from django.db.models.fields.files import *
 
-# fix for django <= 1.1
-if not hasattr(models, 'BigIntegerField'):
-    setattr(models, 'BigIntegerField', models.IntegerField)
+import django
+
+if django.VERSION < (1, 2):
+    BigIntegerField = IntegerField
 
 GENDER_CH = [('M', 'male'), ('F', 'female')]
 
 
 class Person(models.Model):
-    gender = models.CharField(max_length=1, choices=GENDER_CH)
-    happy = models.BooleanField(default=True)
-    name = models.CharField(max_length=30)
-    age = models.IntegerField()
-    bio = models.TextField(null=True)
-    birthday = models.DateField()
-    appointment = models.DateTimeField()
-    wanted_games_qtd = models.BigIntegerField()
-    blog = models.URLField()
-    email = models.EmailField()
+    gender = CharField(max_length=1, choices=GENDER_CH)
+    happy = BooleanField(default=True)
+    name = CharField(max_length=30)
+    age = IntegerField()
+    bio = TextField(null=True)
+    birthday = DateField()
+    appointment = DateTimeField()
+    wanted_games_qtd = BigIntegerField()
+    blog = URLField()
+    email = EmailField()
 
 
 class Dog(models.Model):
-    owner = models.ForeignKey('Person')
-    breed = models.CharField(max_length=50)
+    owner = ForeignKey('Person')
+    breed = CharField(max_length=50)
 
 
 class Store(models.Model):
-    customers = models.ManyToManyField(Person, related_name='favorite_stores',
+    customers = ManyToManyField(Person, related_name='favorite_stores',
         blank=True, null=True)
-    employees = models.ManyToManyField(Person, related_name='employers')
+    employees = ManyToManyField(Person, related_name='employers')
 
 
 class Penguin(models.Model):
-    partner = models.OneToOneField('self')
-    parcel = models.ManyToManyField('self')
+    partner = OneToOneField('self')
+    parcel = ManyToManyField('self')
 
 
 class DummyDateModel(models.Model):
-    date_field = models.DateField()
+    date_field = DateField()
 
 
 class DummyDateTimeModel(models.Model):
-    datetime_field = models.DateTimeField()
+    datetime_field = DateTimeField()
 
 
 class DummySlugModel(models.Model):
@@ -56,54 +60,55 @@ class DummySlugModel(models.Model):
 
 
 class DummyCharModel(models.Model):
-    char_field = models.CharField(max_length=255)
+    char_field = CharField(max_length=255)
 
 
 class DummyTextModel(models.Model):
-    text_field = models.TextField()
+    text_field = TextField()
 
 
 class DummyURLModel(models.Model):
-    url_field = models.URLField()
+    url_field = URLField()
 
 
 class DummyEmailModel(models.Model):
-    email_field = models.EmailField()
+    email_field = EmailField()
 
 
 class DummyIntModel(models.Model):
-    int_field = models.IntegerField()
-    small_int_field = models.SmallIntegerField()
-    big_int_field = models.BigIntegerField()
+    int_field = IntegerField()
+    small_int_field = SmallIntegerField()
+    big_int_field = BigIntegerField()
 
 
 class DummyPositiveIntModel(models.Model):
-    positive_small_int_field = models.PositiveSmallIntegerField()
-    positive_int_field = models.PositiveIntegerField()
+    positive_small_int_field = PositiveSmallIntegerField()
+    positive_int_field = PositiveIntegerField()
 
 
 class DummyNumbersModel(models.Model):
-    float_field = models.FloatField()
+    float_field = FloatField()
 
 
 class DummyDecimalModel(models.Model):
-    decimal_field = models.DecimalField(max_digits=5, decimal_places=2)
+    decimal_field = DecimalField(max_digits=5, decimal_places=2)
 
 
 class DummyBooleanModel(models.Model):
-    boolean_field = models.BooleanField()
+    boolean_field = BooleanField()
 
 
 class DummyFileModel(models.Model):
-    file_field = models.FileField(upload_to='uploads')
+    file_field = FileField(upload_to='uploads')
 
 
 class DummyImageModel(models.Model):
-    image_field = models.FileField(upload_to='images')
+    image_field = FileField(upload_to='images')
 
 
-class UnsupportedField(models.Field):
+class UnsupportedField(Field):
     description = "I'm bad company, mommy doesn't know me"
+
     def __init__(self, *args, **kwargs):
         super(UnsupportedField, self).__init__(*args, **kwargs)
 

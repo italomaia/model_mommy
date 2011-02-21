@@ -71,14 +71,19 @@ def gen_raw_string(max_length, chr_table):
     return ''.join(choice(chr_table) for i in range(max_length))
 
 
-def gen_filename(max_length=100, ext='txt'):
+def gen_filename(max_length, ext_list=('txt', 'pdf', 'odt'), ext=None):
     '''
     Generates a random filename with length up to `max_length` and
-    extension `ext`.
+    extension `ext`. If `ext` is not provided, one of these will be
+    used:('txt', 'pdf', 'odt').
     '''
+    if ext is None:
+        ext = choice(ext_list)
+
+    ext = '.%s' % ext
     txt_length = choice(range(1, max_length - len(ext)))
-    ext = '.%s' % txt
     return gen_raw_string(txt_length, string.letters + '-_') + ext
+gen_filename.required = ['max_length']
 
 
 def gen_slug(max_length=50):
@@ -86,7 +91,7 @@ def gen_slug(max_length=50):
     Generates a random slug with length up to `max_length`.
     '''
     slug_table = string.lowercase + string.digits + '_-'
-    txt_length = choice(range(1, max_length+1))
+    txt_length = choice(range(1, max_length + 1))
     return gen_raw_string(txt_length, slug_table)
 gen_slug.required = ['max_length']
 
@@ -95,7 +100,7 @@ def gen_string(max_length):
     '''
     Generates a random string with length up to `max_length`.
     '''
-    txt_length = choice(range(1, max_length+1))
+    txt_length = choice(range(1, max_length + 1))
     return gen_raw_string(txt_length, string.printable)
 gen_string.required = ['max_length']
 
@@ -107,20 +112,20 @@ gen_boolean = lambda: choice((True, False))
 
 
 # Needs improvement. This only generates one possible URL pattern.
-def gen_url(max_length=200):
+def gen_url(max_length):
     letters = ''.join(choice(string.letters) for i in range(max_length - 15))
     return 'http://www.%s.com' % letters
 gen_url.required = ['max_length']
 
 
-def gen_email(max_length=75):
+def gen_email(max_length):
     # ref: http://en.wikipedia.org/wiki/Email_address
     # local-part: up to 64char
     # domain-part: up to 253char
     # total: up to 254char
 
     assert max_length >= 3
-    max_length = min(max_length, 254) - 1 # -> @
+    max_length = min(max_length, 254) - 1  # -> @
     local_length = choice(range(1, min(max_length, 65)))
     domain_length = min(max_length - local_length, 253)
     email = '%s@%s'
@@ -155,3 +160,4 @@ def gen_email(max_length=75):
     return email % (
         gen_local_part(local_length),
         gen_domain_part(domain_length))
+gen_email.required = ['max_length']

@@ -1,7 +1,9 @@
 # -*- coding:utf-8 -*-
 from django.db.models.fields import *
-from django.test import TestCase
+from django.db.models.fields.related import *
+from django.db.models.fields.files import *
 
+from django.test import TestCase
 import django
 
 if django.VERSION < (1, 2):
@@ -250,3 +252,28 @@ class TestFillingURLFields(TestCase):
 
     def test_generated_url_format(self):
         assert False
+
+
+class TestFillingFileFields(TestCase):
+    
+    def test_create_model_with_FileField(self):
+        from model_mommy import mommy
+        from model_mommy.models import DummyFileModel
+        
+        dummy_file_model = mommy.make_one(DummyFileModel)
+        file_field = dummy_file_model._meta.get_field('file_field')
+        
+        self.assertTrue(isinstance(file_field, FileField))
+        self.assertTrue(
+            isinstance(dummy_file_model.file_field.url, basestring))
+
+    def test_create_model_with_ImageField(self):
+        from model_mommy import mommy
+        from model_mommy.models import DummyImageModel
+        
+        dummy_image_model = mommy.make_one(DummyImageModel)
+        image_field = dummy_image_model._meta.get_field('image_field')
+
+        self.assertTrue(isinstance(image_field, FileField))
+        self.assertTrue(
+            isinstance(dummy_image_model.image_field.url, basestring))
