@@ -44,7 +44,7 @@ it will also create the Kid, automatically.
 
 You can also pass arguments to make one.
 
-    another_kid = mommy.make_one(Kid, {'age':3})
+    another_kid = mommy.make_one(Kid, {'age': 3})
     assert(another_kid.age == 3)
 
 But, if don't need a persisted object, mommy can handle this for you as well:
@@ -88,7 +88,7 @@ generator, you must extend the Mommy class to get this behavior. Let's see a exa
 
     class HardGamerMommy(Mommy):
         attr_mapping = {
-            'wanted_games_qtd':gen_from_list(a_lot_of_games)
+            'wanted_games_qtd': gen_from_list(a_lot_of_games)
         }
 
     mom = HardGamerMommy(Kid)
@@ -103,7 +103,7 @@ You can also change the default generator for a field. Let's take a look:
 
     class KidMommy(Mommy):
         attr_mapping = {
-            'wanted_games_qtd':gen_from_list(a_lot_of_games)
+            'wanted_games_qtd': gen_from_list(a_lot_of_games)
         }
 
     mom = HardGamerMommy(Kid)
@@ -120,7 +120,7 @@ Let's see a dead simple example:
     gen_newborn_age = lambda:0
 
     class BabeMommy(Mommy):
-        attr_mapping = {'age':gen_newborn_age}
+        attr_mapping = {'age': gen_newborn_age}
 
     mom = BabeMommy(Kid)
     baby = mom.make_one()
@@ -128,7 +128,7 @@ Let's see a dead simple example:
 
 If the generator requires a attribute of field as argument, you could do something like this:
 
-    gen_name_from_default = lambda default_value:default_value
+    gen_name_from_default = lambda default_value: default_value
     gen_name_from_default.required = ['default']
 
 ## For contributors
