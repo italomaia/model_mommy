@@ -106,6 +106,14 @@ class DummyImageModel(models.Model):
     image_field = FileField(upload_to='images')
 
 
+class DummyRelationModel(models.Model):
+    pass
+
+
+class DummyOneToOneModel(models.Model):
+    one_to_one_field = models.OneToOneField(DummyRelationModel)
+
+
 class UnsupportedField(Field):
     description = "I'm bad company, mommy doesn't know me"
 

@@ -68,7 +68,7 @@ default_mapping = {
     TextField: generators.gen_text,
 
     ForeignKey: make_one,
-    #OneToOneField:make_one,
+    OneToOneField:make_one,
     ManyToManyField: make_many,
 
     DateField: generators.gen_date,
