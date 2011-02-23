@@ -33,7 +33,7 @@ class FieldFillingTestCase(TestCase):
 
 class FieldFillingWithParameterTestCase(TestCase):
 
-    def test_simple_creating_person_with_parameters(self):
+    def test_simple_create_person_with_parameters(self):
         from model_mommy import mommy
         from model_mommy.models import Person
 
@@ -42,7 +42,7 @@ class FieldFillingWithParameterTestCase(TestCase):
         self.assertEqual(kid.happy, True)
         self.assertEqual(kid.name, 'Mike')
 
-    def test_creating_person_from_factory_using_paramters(self):
+    def test_create_person_from_factory_using_paramters(self):
         from model_mommy.mommy import Mommy
         from model_mommy.models import Person
 
@@ -53,6 +53,13 @@ class FieldFillingWithParameterTestCase(TestCase):
         self.assertEqual(person.happy, False)
         self.assertEqual(person.name, 'John')
         self.assertEqual(person.gender, 'M')
+
+
+#class TestDefaultGenerators(TestCase):
+#    '''
+#    Default generators are those used to generate builtin django fields.
+#    '''
+#    pass
 
 
 class TestNonDefaultGenerators(TestCase):
@@ -89,99 +96,7 @@ class TestNonDefaultGenerators(TestCase):
         self.assertTrue(kid.age in age_list)
 
 
-class SimpleExtendMommy(TestCase):
-
-    def test_simple_extended_mommy_example(self):
-        from model_mommy.mommy import Mommy
-        from model_mommy.models import Person
-
-        class Aunt(Mommy):
-            pass
-
-        aunt = Aunt(Person)
-        self.cousin = aunt.make_one()
-
-    def test_type_mapping_overwriting_boolean_model_behavior(self):
-        from model_mommy.mommy import Mommy
-        from model_mommy.models import Person
-
-        class SadPeopleMommy(Mommy):
-            def __init__(self, model):
-                super(SadPeopleMommy, self).__init__(model)
-                self.type_mapping.update({
-                    BooleanField: lambda: False
-                })
-
-        sad_people_mommy = SadPeopleMommy(Person)
-        person = sad_people_mommy.make_one()
-
-        # making sure this person is sad >:D
-        self.assertEqual(person.happy, False)
-
-
-class LessSimpleExtendMommy(TestCase):
-
-    def test_fail_no_field_attr_string_to_generator_required(self):
-        from model_mommy.mommy import Mommy
-        from model_mommy.models import Person
-
-        gen_oposite = lambda x: not x
-        gen_oposite.required = ['house']
-
-        class SadPeopleMommy(Mommy):
-            attr_mapping = {'happy': gen_oposite}
-
-        mom = SadPeopleMommy(Person)
-        self.assertRaises(AttributeError, lambda: mom.make_one())
-
-    def test_string_to_generator_required(self):
-        from model_mommy.mommy import Mommy
-        from model_mommy.models import Person
-
-        gen_oposite = lambda default: not default
-        gen_oposite.required = ['default']
-
-        class SadPeopleMommy(Mommy):
-            attr_mapping = {'happy': gen_oposite}
-
-        happy_field = Person._meta.get_field('happy')
-        mom = SadPeopleMommy(Person)
-        person = mom.make_one()
-        self.assertEqual(person.happy, not happy_field.default)
-
-    def test_fail_pass_non_string_to_generator_required(self):
-        from model_mommy.mommy import Mommy
-        from model_mommy.models import Person
-
-        gen_age = lambda x: 10
-
-        class MyMommy(Mommy):
-            attr_mapping = {'age': gen_age}
-
-        mom = MyMommy(Person)
-
-        # for int
-        gen_age.required = [10]
-        self.assertRaises(ValueError, lambda: mom.make_one())
-
-        # for float
-        gen_age.required = [10.10]
-        self.assertRaises(ValueError, lambda: mom.make_one())
-
-        # for iterable
-        gen_age.required = [[]]
-        self.assertRaises(ValueError, lambda: mom.make_one())
-
-        # for iterable/dict
-        gen_age.required = [{}]
-        self.assertRaises(ValueError, lambda: mom.make_one())
-
-        # for boolean
-        gen_age.required = [True]
-        self.assertRaises(ValueError, lambda: mom.make_one())
-
-
-class MommyCreatesSimpleModel(TestCase):
+class TestMommyAPI(TestCase):
 
     def test_make_one_should_create_one_object(self):
         from model_mommy import mommy
@@ -190,7 +105,7 @@ class MommyCreatesSimpleModel(TestCase):
         person = mommy.make_one(Person)
         self.assertTrue(isinstance(person, Person))
 
-        # makes sure there's someong in the database
+        # makes sure there's someone in the database
         self.assertEqual(Person.objects.all().count(), 1)
 
         # makes sure it is the person we created
@@ -206,10 +121,53 @@ class MommyCreatesSimpleModel(TestCase):
         # makes sure database is clean
         self.assertEqual(Person.objects.all().count(), 0)
 
+    def test_make_many_people(self):
+        from model_mommy import mommy
+        from model_mommy.models import Person
 
-class MommyCreatesAssociatedModels(TestCase):
+        people = mommy.make_many(Person)
 
-    def test_dependent_models_with_ForeignKey(self):
+        # make_many creates 5 instances by default
+        self.assertEqual(len(people), 5)
+        self.assertEqual(Person.objects.count(), 5)
+
+        # only what we created is in the database
+        for person in people:
+            Person.objects.get(pk=person.id)
+
+    def test_make_many_people_with_params(self):
+        from model_mommy import mommy
+        from model_mommy.models import Person
+
+        people = mommy.make_many(Person, 3, name='Mike')
+
+        for person in people:
+            self.assertTrue(person.name, 'Mike')
+
+        for person in Person.objects.all():
+            self.assertTrue(person.name, 'Mike')
+
+    def test_prepare_many_people(self):
+        from model_mommy import mommy
+        from model_mommy.models import Person
+
+        people = mommy.prepare_many(Person)
+
+        # prepare_many creates 5 instances by default
+        self.assertEqual(len(people), 5)
+        self.assertEqual(Person.objects.count(), 0)
+
+
+class TestMommyModelsWithRelations(TestCase):
+
+    def test_dependent_model_creation_with_ForeignKey(self):
+        from model_mommy import mommy
+        from model_mommy.models import Dog, Person
+
+        dog = mommy.make_one(Dog)
+        self.assertTrue(isinstance(dog.owner, Person))
+
+    def test_dependent_model_creation_with_ForeignKey(self):
         from model_mommy import mommy
         from model_mommy.models import Dog, Person
 
@@ -235,6 +193,20 @@ class MommyCreatesAssociatedModels(TestCase):
         store = mommy.make_one(Store)
         self.assertEqual(store.employees.count(), 5)
         self.assertEqual(store.customers.count(), 5)
+
+    def test_provide_initial_to_many_to_many(self):
+        from model_mommy.models import Person, Store
+        from model_mommy import mommy
+
+        employees = mommy.make_many(Person, 3)
+        customers = mommy.make_many(Person, 20)
+        store = mommy.make_one(Store, employees=employees, customers=customers)
+
+        self.assertEqual(store.employees.count(), 3)
+        self.assertEqual(store.customers.count(), 20)
+
+        for employee in employees:
+            store.employees.get(pk=employee.id)
 
 
 class TestAutoRefPattern(TestCase):

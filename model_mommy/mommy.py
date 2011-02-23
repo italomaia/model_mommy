@@ -44,12 +44,19 @@ def prepare_one(model, **attrs):
 
 def make_many(model, qty=5, **attrs):
     mommy = Mommy(model)
+    return [mommy.make_one() for i in range(qty)]
+
+
+def prepare_many(model, qty=5, **attrs):
+    mommy = Mommy(model)
     return [mommy.prepare() for i in range(qty)]
 
 
 make_one.required = foreign_key_required
 prepare_one.required = foreign_key_required
 make_many.required = foreign_key_required
+prepare_many.required = foreign_key_required
+
 
 default_mapping = {
     BooleanField: generators.gen_boolean,
@@ -68,8 +75,8 @@ default_mapping = {
     TextField: generators.gen_text,
 
     ForeignKey: make_one,
-    OneToOneField:make_one,
-    ManyToManyField: make_many,
+    OneToOneField: make_one,
+    ManyToManyField: prepare_many,
 
     DateField: generators.gen_date,
     DateTimeField: generators.gen_date,
@@ -113,30 +120,27 @@ class Mommy(object):
             if isinstance(field, AutoField):
                 continue
 
-            if isinstance(field, ManyToManyField):
-                # default value was not informed
-                if field.name not in attrs:
-                    if field.null and not self.fill_nullables:
-                        continue  # do not populate
-                    else:
-                        m2m_dict[field.name] = self.generate_value(field)
-                else:
-                    m2m_dict[field.name] = attrs.pop(field.name)
+            if field.null and not self.fill_nullables:
+                continue
 
-            elif field.name not in attrs:
-                if field.null and not self.fill_nullables:
-                    continue
+            elif isinstance(field, ManyToManyField):
+
+                if field.name in attrs:
+                    m2m_dict[field.name] = attrs.pop(field.name)
                 else:
-                    attrs[field.name] = self.generate_value(field)
+                    m2m_dict[field.name] = self.generate_value(field)
+
+            elif not field.name in attrs:
+                attrs[field.name] = self.generate_value(field)
 
         instance = self.model(**attrs)
 
         if commit:
             instance.save()
 
-            # m2m relations are only created if the model is persisted
-            for key, value in m2m_dict.items():
-                m2m_relation = getattr(instance, key)
+            # m2m relations can only be created if the model is persisted
+            for name, value in m2m_dict.items():
+                m2m_relation = getattr(instance, name)
 
                 for model_instance in value:
                     model_instance.save()

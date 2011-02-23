@@ -115,7 +115,8 @@ class DummyOneToOneModel(models.Model):
 
 
 class DummyM2MModel(models.Model):
-    m2m_field = models.ManyToManyField(DummyRelationModel, related_name='relation')
+    m2m_field = models.ManyToManyField(DummyRelationModel,
+        related_name='relation')
 
 
 class UnsupportedField(Field):
