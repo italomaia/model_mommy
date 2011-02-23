@@ -114,6 +114,10 @@ class DummyOneToOneModel(models.Model):
     one_to_one_field = models.OneToOneField(DummyRelationModel)
 
 
+class DummyM2MModel(models.Model):
+    m2m_field = models.ManyToManyField(DummyRelationModel, related_name='relation')
+
+
 class UnsupportedField(Field):
     description = "I'm bad company, mommy doesn't know me"
 

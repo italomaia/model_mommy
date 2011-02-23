@@ -44,7 +44,7 @@ def prepare_one(model, **attrs):
 
 def make_many(model, qty=5, **attrs):
     mommy = Mommy(model)
-    return [mommy.make_one() for i in range(qty)]
+    return [mommy.prepare() for i in range(qty)]
 
 
 make_one.required = foreign_key_required
@@ -106,6 +106,7 @@ class Mommy(object):
         return self.model._meta.fields + self.model._meta.many_to_many
 
     def _make_one(self, commit=True, **attrs):
+        # dict of m2m fields for current model
         m2m_dict = {}
 
         for field in self.get_fields():
@@ -133,11 +134,12 @@ class Mommy(object):
         if commit:
             instance.save()
 
-            # m2m relation is treated differently
+            # m2m relations are only created if the model is persisted
             for key, value in m2m_dict.items():
                 m2m_relation = getattr(instance, key)
 
                 for model_instance in value:
+                    model_instance.save()
                     m2m_relation.add(model_instance)
 
         return instance
