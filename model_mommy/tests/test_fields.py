@@ -91,9 +91,6 @@ class TestFillingEmailField(TestCase):
         self.assertTrue(
             isinstance(dummy_email_model.email_field, basestring))
 
-    def test_generated_email_format(self):
-        assert False
-
 
 class TestFillingBooleanFields(TestCase):
 
@@ -249,9 +246,6 @@ class TestFillingURLFields(TestCase):
         self.assertTrue(isinstance(url_field, URLField))
         self.assertTrue(
             isinstance(dummy_url_field.url_field, basestring))
-
-    def test_generated_url_format(self):
-        assert False
 
 
 class TestFillingFileFields(TestCase):

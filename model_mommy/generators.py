@@ -113,8 +113,12 @@ gen_boolean = lambda: choice((True, False))
 
 # Needs improvement. This only generates one possible URL pattern.
 def gen_url(max_length):
-    letters = ''.join(choice(string.letters) for i in range(max_length - 15))
-    return 'http://www.%s.com' % letters
+    assert max_length >= 20
+    
+    ext = gen_raw_string(choice([2, 3]), string.letters)
+    letters = ''.join(choice(string.letters)
+        for i in range(max_length - 15 - len(ext)))
+    return 'http://www.%s.%s' % (letters, ext)
 gen_url.required = ['max_length']
 
 
