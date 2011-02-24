@@ -91,6 +91,24 @@ class TestFillingEmailField(TestCase):
         self.assertTrue(
             isinstance(dummy_email_model.email_field, basestring))
 
+    def test_if_generated_email_format_is_valid(self):
+        import re
+        import string
+
+        from model_mommy import mommy
+        from model_mommy.models import DummyEmailModel
+
+        dummy_email_model = mommy.make_one(DummyEmailModel)
+        data = dummy_email_model.email_field
+        
+        table = string.letters + string.digits + "!#$%&'*+-/=?^_`{|}~."
+
+        m = re.match(r"[%(t)s]+@[%(t)s](\.[%(t)s]+)*" % {'t': table}, data)
+        self.assertTrue(m is not None)
+        self.assertTrue('..' not in data)
+        self.assertTrue(data[0] != '.')
+        self.assertTrue(data[-1] != '.')
+
 
 class TestFillingBooleanFields(TestCase):
 
