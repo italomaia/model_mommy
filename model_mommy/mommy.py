@@ -62,10 +62,10 @@ default_mapping = {
     BooleanField: generators.gen_boolean,
     IntegerField: generators.gen_integer,
     BigIntegerField: generators.gen_integer,
-    SmallIntegerField: generators.gen_integer,
+    SmallIntegerField: generators.gen_small_integer,
 
     PositiveIntegerField: lambda: generators.gen_integer(0),
-    PositiveSmallIntegerField: lambda: generators.gen_integer(0),
+    PositiveSmallIntegerField: lambda: generators.gen_small_integer(0),
 
     FloatField: generators.gen_float,
     DecimalField: generators.gen_decimal,
