@@ -46,6 +46,10 @@ def gen_integer(min_int=-sys.maxint, max_int=sys.maxint):
     return randint(min_int, max_int)
 
 
+def gen_small_integer(min_int=-32768, max_int=32767):
+    return gen_integer(min_int, max_int)
+
+
 gen_float = lambda: random() * gen_integer()
 
 
