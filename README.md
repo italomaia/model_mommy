@@ -143,5 +143,5 @@ For more examples, see tests.
 
 ##Currently supports the fields:
 
-SlugField, CharField, TextField, URLField, EmailField, FloatField, OneToOneField, ForeignKey, ManyToMany, 
-Date and DateTimeField, BooleanField, and all the integer-type Fields.
+SlugField, CharField, TextField, URLField, EmailField, OneToOneField, ForeignKey, ManyToMany, 
+Date and DateTimeField, BooleanField, and all the numeric type Fields.
