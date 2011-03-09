@@ -129,6 +129,28 @@ class Mapper(object):
         '''
         return choice(map(lambda c: c[0], field.choices))
 
+    def value_for_ipaddressfield(self, field):
+        '''
+        10.x.x.x cannot be used along with 192.168.x.x, 172.16.0.0 to 172.31.255.255
+        '''
+        ip_address = None
+
+        while True:
+            ip_address = [
+                randint(0, 255), randint(0, 255),
+                randint(0, 255), randint(0, 255)]
+
+            if ip_address[0] == 10
+            or (ip_address[0] == 192 and ip_address[1] == 168)
+            or ip_address == [172, 16, 0, 0]
+            or ip_address == [172, 31, 255, 255]:
+                ip_address = [
+                    randint(0, 255), randint(0, 255),
+                    randint(0, 255), randint(0, 255)]
+            else:
+                break
+        return '.'.join(ip_address)
+
     def value_for_integerfield(self, min=-2147483647, max=2147483647):
         '''
         Creates a random 32bits integer.
@@ -136,7 +158,21 @@ class Mapper(object):
         '''
         return randint(min, max)
 
+    def value_for_positiveintegerfield(self, min=0, max=2147483647):
+        '''
+        Creates a random 32bits integer.
+
+        '''
+        return randint(min, max)
+
     def value_for_smallintegerfield(self, min=-32768, max=32768):
+        '''
+        Creates a random 16bits integer.
+
+        '''
+        return randint(min, max)
+
+    def value_for_positivesmallintegerfield(self, min=0, max=32768):
         '''
         Creates a random 16bits integer.
 
@@ -159,6 +195,9 @@ class Mapper(object):
             num_as_str(max_digits-decimal_places), 
             num_as_str(decimal_places)))
 
+    def value_for_commaseparatedintegerfield(self, field):
+        raise Exception('Not implemented')
+
     def value_for_floatfield(self, field):
         '''
         Creates a random float value.
@@ -172,6 +211,9 @@ class Mapper(object):
         
         '''
         return datetime.date.today()
+
+    def value_for_timefield(self, field):
+        raise Exception('Not implemented')
 
     def value_for_datetimefield(self, field):
         '''
@@ -202,6 +244,9 @@ class Mapper(object):
         '''
         return self.raw_string(
             randint(1, MAX_LENGTH), string.printable)
+
+    def value_for_xmlfield(self, field):
+        raise Exception('Not implemented')
 
     def value_for_urlfield(self, field):
         '''
@@ -259,6 +304,9 @@ class Mapper(object):
         ext_list = ('.txt', '.odt', '.pdf')
         return self.raw_filename(field.max_length, ext_list)
 
+    def value_for_filepathfield(self, field):
+        raise Exception('Not implemented')
+
     def value_for_booleanfield(self, field):
         '''
         Generates a random True or False value.
@@ -266,11 +314,18 @@ class Mapper(object):
         '''
         return choice((True, False))
 
+    def value_for_nullbooleanfield(self, field):
+        '''
+        Generates a random None, True or False value.
+        
+        '''
+        return choice((None, True, False))
+
     def value_for_foreignkey(self, field):
         field_model = field.related.parent_model
         return Mapper(field_model).make_one()
 
-    def make_one(self, commit=True):
+    def make_one(self, commit=True):  # TODO
         attrs = {}
         m2m_attrs = {}
 
@@ -289,9 +344,6 @@ class Mapper(object):
                     for m2m_instance in value:
                         m2m_instance.save()
                         m2m_relation.add(m2m_instance)
-        return instance
-                    
-                        
         return instance
 
     def get_fields(self):

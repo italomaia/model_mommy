@@ -143,5 +143,27 @@ For more examples, see tests.
 
 ##Currently supports the fields:
 
-SlugField, CharField, TextField, URLField, EmailField, OneToOneField, ForeignKey, ManyToMany, 
-Date and DateTimeField, BooleanField, and all the numeric type Fields.
+* SlugField
+* CharField
+* TextField
+* URLField
+* EmailField
+* Date
+* DateTimeField
+* BooleanField
+* NullBooleanField
+* PositiveIntegerField
+* IntegerField
+* PositiveSmallIntegerField
+* SmallIntegerField
+* BigIntegerField
+* DecimalField
+* IPAddressField
+
+## Currently unsupported fields:
+
+* XMLField
+* OneToOneField
+* ForeignKey
+* ManyToMany
+
