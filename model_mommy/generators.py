@@ -27,7 +27,7 @@ DOMAIN_EXT_LIST = (
     '.com.br', '.cc', '.de', '.es', '.com.es', '.nom.es', '.org.es',
     '.eu', '.fm', '.gs', '.in', '.co.in', '.firm.in', '.gen.in', '.tv',
     '.ind.in', '.net.in', '.org.in', '.jobs', '.jp', '.ms', '.com.mx',
-    '.nl', '.nu', '.co.nz', '.net.nz', '.org.nz', '.tc', '.tk', 
+    '.nl', '.nu', '.co.nz', '.net.nz', '.org.nz', '.tc', '.tk',
     '.tw', '.com.tw', '.idv.tw', '.co.uk', '.me.uk', '.org.uk'
 )
 
@@ -131,7 +131,10 @@ class Mapper(object):
 
     def value_for_ipaddressfield(self, field):
         '''
-        10.x.x.x cannot be used along with 192.168.x.x, 172.16.0.0 to 172.31.255.255
+        Not allowed:
+        [0] 10.x.x.x
+        [1] 192.168.x.x
+        [2] 172.16.0.0 to 172.31.255.255
         '''
         ip_address = None
 
@@ -140,10 +143,9 @@ class Mapper(object):
                 randint(0, 255), randint(0, 255),
                 randint(0, 255), randint(0, 255)]
 
-            if ip_address[0] == 10
-            or (ip_address[0] == 192 and ip_address[1] == 168)
-            or ip_address == [172, 16, 0, 0]
-            or ip_address == [172, 31, 255, 255]:
+            if ip_address[0] == 10  # filter [0]
+            or (ip_address[0] == 192 and ip_address[1] == 168)  # filter [1]
+            or (ip_address >= [172, 16, 0, 0] and ip_address <= [172, 31, 255, 255]):  # filter [2]
                 ip_address = [
                     randint(0, 255), randint(0, 255),
                     randint(0, 255), randint(0, 255)]
@@ -183,7 +185,7 @@ class Mapper(object):
         '''
         Creates a random decimal field obeying field decimal_places and
         max_digits constrains.
-        
+
         '''
         max_digits, decimal_places =\
             field.max_digits, field.decimal_places
@@ -192,7 +194,7 @@ class Mapper(object):
             ranint(1, max_length), string.digits)
 
         return Decimal('%s.%s' % (
-            num_as_str(max_digits-decimal_places), 
+            num_as_str(max_digits-decimal_places),
             num_as_str(decimal_places)))
 
     def value_for_commaseparatedintegerfield(self, field):
@@ -201,14 +203,14 @@ class Mapper(object):
     def value_for_floatfield(self, field):
         '''
         Creates a random float value.
-        
+
         '''
         return random() * self.gen_integer()
 
     def value_for_datefield(self, field):
         '''
         Creates a date value with the current date.
-        
+
         '''
         return datetime.date.today()
 
@@ -218,7 +220,7 @@ class Mapper(object):
     def value_for_datetimefield(self, field):
         '''
         Creates a datetime value with the current time.
-        
+
         '''
         return datetime.datetime.now()
 
@@ -263,7 +265,7 @@ class Mapper(object):
         '''
         Creates a valid email string according to
         http://en.wikipedia.org/wiki/Email_address
-        
+
         '''
         assert field.max_length > 11, 'max length is too small'
         assert field.max_length < 255, 'max length is too big'
@@ -291,7 +293,7 @@ class Mapper(object):
     def value_for_imagefield(self, field):
         '''
         Creates a filename with a image extension.
-        
+
         '''
         ext_list = ('.jpg', '.png', '.gif')
         return self.raw_filename(field.max_length, ext_list)
@@ -299,7 +301,7 @@ class Mapper(object):
     def value_for_filefield(self, field):
         '''
         Creates a filename with a document extension.
-        
+
         '''
         ext_list = ('.txt', '.odt', '.pdf')
         return self.raw_filename(field.max_length, ext_list)
@@ -310,14 +312,14 @@ class Mapper(object):
     def value_for_booleanfield(self, field):
         '''
         Generates a random True or False value.
-        
+
         '''
         return choice((True, False))
 
     def value_for_nullbooleanfield(self, field):
         '''
         Generates a random None, True or False value.
-        
+
         '''
         return choice((None, True, False))
 
@@ -351,7 +353,7 @@ class Mapper(object):
     def get_fields(self):
         '''Returns a mapped dict with all non m2m fields from the model'''
         return self.model._meta.fields
-    
+
     def get_m2m_fields(self):
         '''Returns a mapped dict with all manytomany fields from the model'''
         return self.model._meta.many_to_many
