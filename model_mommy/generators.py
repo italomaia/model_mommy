@@ -146,9 +146,7 @@ class Mapper(object):
             if ip_address[0] == 10  # filter [0]
             or (ip_address[0] == 192 and ip_address[1] == 168)  # filter [1]
             or (ip_address >= [172, 16, 0, 0] and ip_address <= [172, 31, 255, 255]):  # filter [2]
-                ip_address = [
-                    randint(0, 255), randint(0, 255),
-                    randint(0, 255), randint(0, 255)]
+                continue
             else:
                 break
         return '.'.join(ip_address)
