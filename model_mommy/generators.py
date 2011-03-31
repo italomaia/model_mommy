@@ -110,7 +110,7 @@ class Mapper(object):
             hostnames.append(self.raw_hostname(newhost_length))
         return '.'.join(hostnames) + ext
 
-    def __init__(self, model, fill_nullable=True, use_default=False):
+    def __init__(self, fill_nullable=True, use_default=False):
         '''
         Keyword arguments:
         -- fill_nullable - If False, all fields with null=True will receive None.
@@ -118,7 +118,6 @@ class Mapper(object):
         will be filled from default value.
 
         '''
-        self.model = model
         self.fill_nullable = fill_nullable
         self.use_default = use_default
 
@@ -325,19 +324,19 @@ class Mapper(object):
         field_model = field.related.parent_model
         return Mapper(field_model).make_one()
 
-    def make_one(self, attrs=None, m2m_attrs=None, commit=True):  # TODO
+    def make_one(self, model, attrs=None, m2m_attrs=None, commit=True):  # TODO
         attrs = attrs or {}
         m2m_attrs = m2m_attrs or {}
 
-        for field in self.fields:
+        for field in self.get_fields(model):
             if field.name not in attrs:
                 attrs[field.name] = self.resolve(field)
 
-        for field in self.m2m_fields:
+        for field in self.get_m2m_fields(model):
             if field.name not in m2m_attrs:
                 m2m_attrs[field.name] = self.resolve(field)
 
-        instance = self.model(**attrs)
+        instance = model(**attrs)
         if commit:
             instance.save()
             if m2m_attrs:  # m2m only for persisted instances
@@ -348,13 +347,13 @@ class Mapper(object):
                         m2m_relation.add(m2m_instance)
         return instance
 
-    def get_fields(self):
+    def get_fields(self, model):
         '''Returns a mapped dict with all non m2m fields from the model'''
-        return self.model._meta.fields
+        return model._meta.fields
 
-    def get_m2m_fields(self):
+    def get_m2m_fields(self, model):
         '''Returns a mapped dict with all manytomany fields from the model'''
-        return self.model._meta.many_to_many
+        return model._meta.many_to_many
 
     def resolve(self, field):
         '''
@@ -386,5 +385,3 @@ class Mapper(object):
             else:  # type not supported
                 raise TypeError('%s is not supported by mommy.' % field.__class__)
 
-    fields = property(get_fields)
-    m2m_fields = property(get_m2m_fields)
