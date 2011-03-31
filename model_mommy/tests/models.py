@@ -128,3 +128,7 @@ class UnsupportedField(Field):
 
 class UnsupportedModel(models.Model):
     unsupported_field = UnsupportedField()
+
+
+class DummyEmailModel(models.Model):
+    email_field = models.EmailField()

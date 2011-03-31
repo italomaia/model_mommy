@@ -7,7 +7,7 @@ It generate the values according with the field type, but i will add support to 
 
     pip install model_mommy
 
-## Basic Usage:
+## Basic Usage
 
 If you have a model like this in your app:
 
@@ -20,7 +20,7 @@ If you have a model like this in your app:
         birthday = models.DateField()
         appointment = models.DateTimeField()
 
-just call the mommy =):
+just call mommy =):
 
     from model_mommy import mommy
     from model_mommy.models import Kid
@@ -42,10 +42,10 @@ when you do:
 
 it will also create the Kid, automatically.
 
-You can also pass arguments to make one.
+You can also specify values for one or more attribute.
 
-    another_kid = mommy.make_one(Kid, {'age': 3})
-    assert(another_kid.age == 3)
+    another_kid = mommy.make_one(Kid, age = 3)
+    assert another_kid.age == 3
 
 But, if don't need a persisted object, mommy can handle this for you as well:
 
@@ -56,10 +56,9 @@ But, if don't need a persisted object, mommy can handle this for you as well:
 
 It works like make_one, but like was said, it doesn't persist the instance.
 
-## Not so Basic Usage:
+## Not so Basic Usage
 
-Model instances can also be generated from Mommy factories. Make your
-mass producer mom like this:
+Model instances can also be generated from Mommy factories. Make your mass producer mom like this:
 
     from model_mommy.mommy import Mommy
     from model_mommy.models import Kid
@@ -69,16 +68,23 @@ mass producer mom like this:
     second_kid = mom.make_one()
     third_kid = mom.make_one()
 
-Note that this kind of construction is much more efficient than
-mommy.make_one(Model), so, if you need to create a lot of instances,
-this much be a nicier approach.
+Note that this kind of construction is much more efficient than mommy.make_one(Model),
+so, if you need to create a lot of instances, this might be a nicier approach, or...
 
-## Even Less Basic Usage
+    from model_mommy.mommy import Mommy
+    from model_mommy.models import Kid
+
+    mom = Mommy(Kid)
+    kids = mom.make_many(3)
+    assert len(kids) == 3
+
+## Extending Mommy
 
 All attributes used to automatically populate mommy generated instances
 are created with generators from **model_mommy/generators.py**. If you want
-a specific field to be populated with a different generator from the default
-generator, you must extend the Mommy class to get this behavior. Let's see a example:
+a specific field to be populated with a generator different from the default
+generator, you must extend the Mommy class to get this behavior.
+Let's see a example:
 
     from model_mommy.generators import gen_from_list
     from model_mommy.models import Kid
@@ -95,21 +101,6 @@ generator, you must extend the Mommy class to get this behavior. Let's see a exa
     kid = mom.make_one()
     assert(kid.wanted_games_qtd in a_lot_of_games)
 
-You can also change the default generator for a field. Let's take a look:
-
-    from random import randint
-    from model_mommy.models import Kid
-    from model_mommy.mommy import Mommy
-
-    class KidMommy(Mommy):
-        attr_mapping = {
-            'wanted_games_qtd': gen_from_list(a_lot_of_games)
-        }
-
-    mom = HardGamerMommy(Kid)
-    kid = mom.make_one()
-    assert(kid.wanted_games_qtd in a_lot_of_games)
-
 Note that you can also create your own generator.
 
 ## Your Own Generator
@@ -117,16 +108,16 @@ Note that you can also create your own generator.
 A generator is just a simple callable (like a function) that may require a few arguments.
 Let's see a dead simple example:
 
-    gen_newborn_age = lambda:0
+    gen_newborn_age = lambda: 0
 
     class BabeMommy(Mommy):
         attr_mapping = {'age': gen_newborn_age}
 
     mom = BabeMommy(Kid)
     baby = mom.make_one()
-    assert(baby.age==0)
+    assert(baby.age == 0)
 
-If the generator requires a attribute of field as argument, you could do something like this:
+If the generator requires a attribute from the field as argument, you could do something like this:
 
     gen_name_from_default = lambda default_value: default_value
     gen_name_from_default.required = ['default']
@@ -134,14 +125,29 @@ If the generator requires a attribute of field as argument, you could do somethi
 ## For contributors
 
 If you want to contribute with model_mommy, fork the project. Here are a few guidelines for you:
- 
+
  * Write tests for all code you commit (untested code might be refused)
  * Check your tests coverage
  * Follow pep8 guidelines
 
 For more examples, see tests.
 
+You can also override the type_mapping, if you want to all values from a given Field to be populate with a value you prefer.
+To it like this:
+
+    class TimeCopMommy(Mommy):
+        def __init__(self, model, fill_nullables=True):
+            super(Mommy, self).__init__(model, fill_nullables)
+            self.type_mapping[DateField] = datetime.date(2011, 02, 02)
+
+## Doubts? Loved it? Hated it? Suggestions?
+
+Mail us!:
+*  vanderson.mota **at** gmail **dot** com
+*  italo.maia **at** gmail **dot** com
+
 ##Currently supports the fields:
 
-SlugField, CharField, TextField, URLField, EmailField, OneToOneField, ForeignKey, ManyToMany, 
-Date and DateTimeField, BooleanField, and all the numeric type Fields.
+SlugField, CharField, TextField, URLField, EmailField, FileField,
+OneToOneField, ForeignKey, ManyToMany, Date and DateTimeField,
+BooleanField, and all the numeric fields.

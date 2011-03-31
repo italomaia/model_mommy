@@ -76,20 +76,20 @@ class LessSimpleExtendMommy(TestCase):
 
         # for int
         gen_age.required = [10]
-        self.assertRaises(ValueError, lambda: mom.make_one())
+        self.assertRaises(ValueError, mom.make_one)
 
         # for float
         gen_age.required = [10.10]
-        self.assertRaises(ValueError, lambda: mom.make_one())
+        self.assertRaises(ValueError, mom.make_one)
 
         # for iterable
         gen_age.required = [[]]
-        self.assertRaises(ValueError, lambda: mom.make_one())
+        self.assertRaises(ValueError, mom.make_one)
 
         # for iterable/dict
         gen_age.required = [{}]
-        self.assertRaises(ValueError, lambda: mom.make_one())
+        self.assertRaises(ValueError, mom.make_one)
 
         # for boolean
         gen_age.required = [True]
-        self.assertRaises(ValueError, lambda: mom.make_one())
+        self.assertRaises(ValueError, mom.make_one)

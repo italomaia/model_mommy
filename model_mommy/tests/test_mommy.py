@@ -3,13 +3,12 @@
 from datetime import date, datetime
 from decimal import Decimal
 
-from django.db.models.fields import *
 import django
+from django.test import TestCase
+from django.db.models.fields import *
 
 if django.VERSION < (1, 2):
     BigIntegerField = IntegerField
-
-from django.test import TestCase
 
 
 class TestDjangoVersinoIssues(TestCase):
@@ -167,16 +166,9 @@ class TestMommyModelsWithRelations(TestCase):
         dog = mommy.make_one(Dog)
         self.assertTrue(isinstance(dog.owner, Person))
 
-    def test_dependent_model_creation_with_ForeignKey(self):
-        from model_mommy import mommy
-        from model_mommy.models import Dog, Person
-
-        dog = mommy.make_one(Dog)
-        self.assertTrue(isinstance(dog.owner, Person))
-
     def test_prepare_one_should_not_create_one_object(self):
         from model_mommy import mommy
-        from model_mommy.models import Person, Dog
+        from model_mommy.models import Dog, Person
 
         dog = mommy.prepare_one(Dog)
         self.assertTrue(isinstance(dog, Dog))

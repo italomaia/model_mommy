@@ -19,7 +19,6 @@ from random import randint, choice, random
 
 MAX_LENGTH = 300
 
-
 def gen_from_default(default):
     return default
 gen_from_default.required = ['default']
@@ -41,10 +40,8 @@ def gen_from_choices(C):
     choice_list = map(lambda x: x[0], C)
     return gen_from_list(choice_list)
 
-
-def gen_integer(min_int=-sys.maxint, max_int=sys.maxint):
+def gen_integer(min_int=-2147483647, max_int=2147483647):
     return randint(min_int, max_int)
-
 
 def gen_small_integer(min_int=-32768, max_int=32767):
     return gen_integer(min_int, max_int)
@@ -118,7 +115,7 @@ gen_boolean = lambda: choice((True, False))
 # Needs improvement. This only generates one possible URL pattern.
 def gen_url(max_length):
     assert max_length >= 20
-    
+
     ext = gen_raw_string(choice([2, 3]), string.letters)
     letters = ''.join(choice(string.letters)
         for i in range(max_length - 15 - len(ext)))

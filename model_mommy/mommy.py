@@ -112,14 +112,16 @@ class Mommy(object):
     def get_fields(self):
         return self.model._meta.fields + self.model._meta.many_to_many
 
+    #Method too big
     def _make_one(self, commit=True, **attrs):
         # dict of m2m fields for current model
         m2m_dict = {}
 
         for field in self.get_fields():
-            if isinstance(field, AutoField):
+            if isinstance(field, AutoField):  # auto populated
                 continue
 
+            # should be left blank?
             if field.null and not self.fill_nullables:
                 continue
 
@@ -196,5 +198,4 @@ def get_required_values(generator, field):
             else:
                 raise ValueError("Required value '%s'"
                 " is of wrong type. Don't make mommy sad." % str(item))
-
     return rt

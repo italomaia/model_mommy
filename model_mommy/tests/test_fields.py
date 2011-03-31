@@ -3,8 +3,8 @@ from django.db.models.fields import *
 from django.db.models.fields.related import *
 from django.db.models.fields.files import *
 
-from django.test import TestCase
 import django
+from django.test import TestCase
 
 if django.VERSION < (1, 2):
     BigIntegerField = IntegerField
