@@ -375,9 +375,11 @@ class Mapper(object):
             return self.value_from_choices(field)
 
         else:
+            # check for field_name
             if hasattr(self, 'value_for_%s' % name):
                 return getattr('value_for_%s' % name)(field)
 
+            # check for class_name
             elif hasattr(self, 'value_for_%s' % class_name):
                 return getattr('value_for_%s' % class_name)(field)
 
