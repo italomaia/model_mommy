@@ -143,8 +143,9 @@ To it like this:
 ## Doubts? Loved it? Hated it? Suggestions?
 
 Mail us!:
-*  vanderson.mota **at** gmail **dot** com
-*  italo.maia **at** gmail **dot** com
+
+ *  vanderson.mota **at** gmail **dot** com
+ *  italo.maia **at** gmail **dot** com
 
 ##Currently supports the fields:
 
