@@ -110,16 +110,16 @@ class Mapper(object):
             hostnames.append(self.raw_hostname(newhost_length))
         return '.'.join(hostnames) + ext
 
-    def __init__(self, model, fill_null=True, use_default=False):
+    def __init__(self, model, fill_nullable=True, use_default=False):
         '''
         Keyword arguments:
-        -- fill_null - If False, all fields with null=True will receive None.
+        -- fill_nullable - If False, all fields with null=True will receive None.
         -- use_default - If True, all fields with default value defined
         will be filled from default value.
 
         '''
         self.model = model
-        self.fill_null = fill_null
+        self.fill_nullable = fill_nullable
         self.use_default = use_default
 
     def value_from_choices(self, field):
@@ -365,7 +365,7 @@ class Mapper(object):
         name = field.name
         class_name = field.__class__.__name__.lower()
 
-        if field.null and not self.fill_null:
+        if field.null and not self.fill_nullable:
             return None
 
         elif field.has_default() and self.use_default:
