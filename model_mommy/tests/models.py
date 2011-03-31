@@ -110,6 +110,18 @@ class DummyRelationModel(models.Model):
     pass
 
 
+class DummyAutoOneToOneRefField(models.Model):
+    auto_ref = models.OneToOneField('self', blank=True, null=True)
+
+
+class DummyAutoForeignKeyRefField(models.Model):
+    auto_ref = models.ForeignKey('self', blank=True, null=True)
+
+
+class DummyAutoM2MKeyRefField(models.Model):
+    some = models.ManyToManyField('self', related_name='others')
+
+
 class DummyOneToOneModel(models.Model):
     one_to_one_field = models.OneToOneField(DummyRelationModel)
 

@@ -325,15 +325,17 @@ class Mapper(object):
         field_model = field.related.parent_model
         return Mapper(field_model).make_one()
 
-    def make_one(self, commit=True):  # TODO
-        attrs = {}
-        m2m_attrs = {}
+    def make_one(self, attrs=None, m2m_attrs=None, commit=True):  # TODO
+        attrs = attrs or {}
+        m2m_attrs = m2m_attrs or {}
 
         for field in self.fields:
-            attrs[field.name] = self.resolve(field)
+            if field.name not in attrs:
+                attrs[field.name] = self.resolve(field)
 
         for field in self.m2m_fields:
-            m2m_attrs[field.name] = self.resolve(field)
+            if field.name not in m2m_attrs:
+                m2m_attrs[field.name] = self.resolve(field)
 
         instance = self.model(**attrs)
         if commit:
@@ -347,9 +349,11 @@ class Mapper(object):
         return instance
 
     def get_fields(self):
+        '''Returns a mapped dict with all non m2m fields from the model'''
         return self.model._meta.fields
     
     def get_m2m_fields(self):
+        '''Returns a mapped dict with all manytomany fields from the model'''
         return self.model._meta.many_to_many
 
     def resolve(self, field):
