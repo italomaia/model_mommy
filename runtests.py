@@ -16,8 +16,8 @@ def runtests():
         sys.exit(result)
     except ImportError:
         from django.test.simple import DjangoTestSuiteRunner
-        test_suite =  DjangoTestSuiteRunner(['model_mommy'], 1, True)
-        result = test_suite.run_tests()
+        test_suite =  DjangoTestSuiteRunner(1, True)
+        result = test_suite.run_tests(['model_mommy'])
         sys.exit(result)
 
 
