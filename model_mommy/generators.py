@@ -46,6 +46,11 @@ def gen_integer(min_int=-2147483648, max_int=2147483647):
     return randint(min_int, max_int)
 
 
+def gen_big_integer(min_int=-9223372036854775808l, max_int=9223372036854775807l):
+    '64bits integer'
+    return randint(min_int, max_int)
+
+
 def gen_small_integer(min_int=-32768, max_int=32767):
     '16bits integer'
     return gen_integer(min_int, max_int)

@@ -61,7 +61,7 @@ prepare_many.required = foreign_key_required
 default_mapping = {
     BooleanField: generators.gen_boolean,
     IntegerField: generators.gen_integer,
-    BigIntegerField: generators.gen_integer,
+    BigIntegerField: generators.gen_big_integer,
     SmallIntegerField: generators.gen_small_integer,
 
     PositiveIntegerField: generators.gen_positive_integer,

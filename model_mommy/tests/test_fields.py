@@ -182,6 +182,8 @@ class TestFillingIntFields(TestCase):
         
         self.assertTrue(isinstance(big_int_field, BigIntegerField))
         self.assertTrue(isinstance(big_int, int) or isinstance(big_int, long))
+        self.assertTrue(big_int >= -9223372036854775808l)
+        self.assertTrue(big_int <=  9223372036854775807l)
 
     def test_create_model_with_SmallIntegerField(self):
         from model_mommy.models import DummyIntModel
