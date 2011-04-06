@@ -166,28 +166,33 @@ class TestFillingIntFields(TestCase):
     def test_create_model_with_IntegerField(self):
         from model_mommy.models import DummyIntModel
 
-        int_field = DummyIntModel._meta.get_field('int_field')
-        self.assertTrue(isinstance(int_field, IntegerField))
+        integer = self.dummy_int_model.int_field
+        integer_field = DummyIntModel._meta.get_field('int_field')
 
-        self.assertTrue(isinstance(self.dummy_int_model.int_field, int))
+        self.assertTrue(isinstance(integer_field, IntegerField))
+        self.assertTrue(isinstance(integer, int))
+        self.assertTrue(integer >= -2147483648)
+        self.assertTrue(integer <=  2147483647)
 
     def test_create_model_with_BigIntegerField(self):
         from model_mommy.models import DummyIntModel
 
+        big_int = self.dummy_int_model.big_int_field
         big_int_field = DummyIntModel._meta.get_field('big_int_field')
+        
         self.assertTrue(isinstance(big_int_field, BigIntegerField))
-
-        self.assertTrue(isinstance(self.dummy_int_model.big_int_field, int))
+        self.assertTrue(isinstance(big_int, int) or isinstance(big_int, long))
 
     def test_create_model_with_SmallIntegerField(self):
         from model_mommy.models import DummyIntModel
 
+        small_int = self.dummy_int_model.small_int_field
         small_int_field = DummyIntModel._meta.get_field('small_int_field')
-        self.assertTrue(isinstance(small_int_field, SmallIntegerField))
 
-        self.assertTrue(isinstance(self.dummy_int_model.small_int_field, int))
-        self.assertTrue(self.dummy_int_model.small_int_field >= -32768)
-        self.assertTrue(self.dummy_int_model.small_int_field <= 32768)
+        self.assertTrue(isinstance(small_int_field, SmallIntegerField))
+        self.assertTrue(isinstance(small_int, int))
+        self.assertTrue(small_int >= -32768)
+        self.assertTrue(small_int <=  32767)
 
 
 class TestFillingPositiveIntFields(TestCase):
@@ -202,31 +207,32 @@ class TestFillingPositiveIntFields(TestCase):
     def test_create_model_with_PositiveSmallIntegerField(self):
         from model_mommy.models import DummyPositiveIntModel
 
+        positive_small_int = \
+            self.dummy_positive_int_model.positive_small_int_field
+
         positive_small_int_field = DummyPositiveIntModel.\
             _meta.get_field('positive_small_int_field')
 
         self.assertTrue(isinstance(
             positive_small_int_field, PositiveSmallIntegerField))
 
-        positive_small_int_field = \
-            self.dummy_positive_int_model.positive_small_int_field
-
-        self.assertTrue(isinstance(positive_small_int_field, int))
-        self.assertTrue(positive_small_int_field >= 0)
-        self.assertTrue(positive_small_int_field <= 32768)
+        self.assertTrue(isinstance(positive_small_int, int))
+        self.assertTrue(positive_small_int >= 0)
+        self.assertTrue(positive_small_int <= 65535)
 
     def test_create_model_with_PositiveIntegerField(self):
         from model_mommy.models import DummyPositiveIntModel
+
+        positive_int = self.dummy_positive_int_model.positive_int_field
 
         positive_int_field = DummyPositiveIntModel.\
             _meta.get_field('positive_int_field')
 
         self.assertTrue(isinstance(positive_int_field, PositiveIntegerField))
 
-        self.assertTrue(isinstance(
-            self.dummy_positive_int_model.positive_int_field, int))
-        self.assertTrue(
-            self.dummy_positive_int_model.positive_int_field >= 0)
+        self.assertTrue(isinstance(positive_int, int) or isinstance(positive_int, long))
+        self.assertTrue(positive_int >= 0)
+        self.assertTrue(positive_int <= 4294967295)
 
 
 class TestFillingOthersNumericFields(TestCase):
