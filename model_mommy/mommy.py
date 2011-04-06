@@ -64,8 +64,8 @@ default_mapping = {
     BigIntegerField: generators.gen_integer,
     SmallIntegerField: generators.gen_small_integer,
 
-    PositiveIntegerField: lambda: generators.gen_integer(0),
-    PositiveSmallIntegerField: lambda: generators.gen_small_integer(0),
+    PositiveIntegerField: generators.gen_positive_integer,
+    PositiveSmallIntegerField: generators.gen_positive_small_integer,
 
     FloatField: generators.gen_float,
     DecimalField: generators.gen_decimal,
