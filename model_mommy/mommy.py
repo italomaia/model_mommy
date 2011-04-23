@@ -60,8 +60,8 @@ prepare_many.required = foreign_key_required
 
 default_mapping = {
     BooleanField: generators.gen_boolean,
-    IntegerField: generators.gen_integer,
     BigIntegerField: generators.gen_big_integer,
+    IntegerField: generators.gen_integer,
     SmallIntegerField: generators.gen_small_integer,
 
     PositiveIntegerField: generators.gen_positive_integer,
@@ -93,6 +93,10 @@ class Mommy(object):
     type_mapping = None
 
     def __init__(self, model, fill_nullables=True):
+        '''Set fill_nullables to False if you want fields that can receive
+        null values to be left blank by default. You can still overwrite
+        nullable fields manually.'''
+
         self.type_mapping = default_mapping.copy()
         self.model = model
         self.fill_nullables = fill_nullables
