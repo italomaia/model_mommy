@@ -17,7 +17,12 @@ import datetime
 from decimal import Decimal
 from random import randint, choice, random
 
+
 MAX_LENGTH = 300
+MIN_INT, MAX_INT = -2147483648, 2147483647
+MIN_BIG_INT, MAX_BIG_INT = -9223372036854775808l, 9223372036854775807l
+MIN_SMALL_INT, MAX_SMALL_INT = -32768, 32767
+
 
 def gen_from_default(default):
     return default
@@ -41,27 +46,27 @@ def gen_from_choices(C):
     return gen_from_list(choice_list)
 
 
-def gen_integer(min_int=-2147483648, max_int=2147483647):
+def gen_integer(min_int=MIN_INT, max_int=MAX_INT):
     '32bits integer'
     return randint(min_int, max_int)
 
 
-def gen_big_integer(min_int=-9223372036854775808l, max_int=9223372036854775807l):
+def gen_big_integer(min_int=MIN_BIG_INT, max_int=MAX_BIG_INT):
     '64bits integer'
     return randint(min_int, max_int)
 
 
-def gen_small_integer(min_int=-32768, max_int=32767):
+def gen_small_integer(min_int=MIN_SMALL_INT, max_int=MAX_SMALL_INT):
     '16bits integer'
     return gen_integer(min_int, max_int)
 
 
-def gen_positive_integer(min_int=0, max_int=4294967295):
+def gen_positive_integer(min_int=0, max_int=MAX_INT*2+1):
     'positive 32bits integer'
     return randint(min_int, max_int)
 
 
-def gen_positive_small_integer(min_int=0, max_int=65535):
+def gen_positive_small_integer(min_int=0, max_int=MAX_SMALL_INT*2+1):
     'positive 16bits integer'
     return gen_integer(min_int, max_int)
 
