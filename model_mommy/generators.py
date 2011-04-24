@@ -38,7 +38,9 @@ def gen_from_list(L):
     '''
     return lambda: choice(L)
 
+
 # -- DEFAULT GENERATORS --
+
 
 def gen_from_choices(C):
     choice_list = map(lambda x: x[0], C)
@@ -60,12 +62,12 @@ def gen_small_integer(min_int=MIN_SMALL_INT, max_int=MAX_SMALL_INT):
     return gen_integer(min_int, max_int)
 
 
-def gen_positive_integer(min_int=0, max_int=MAX_INT*2+1):
+def gen_positive_integer(min_int=0, max_int=MAX_INT * 2 + 1):
     'positive 32bits integer'
     return randint(min_int, max_int)
 
 
-def gen_positive_small_integer(min_int=0, max_int=MAX_SMALL_INT*2+1):
+def gen_positive_small_integer(min_int=0, max_int=MAX_SMALL_INT * 2 + 1):
     'positive 16bits integer'
     return gen_integer(min_int, max_int)
 

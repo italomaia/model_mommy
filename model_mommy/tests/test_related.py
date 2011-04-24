@@ -32,13 +32,14 @@ class TestFillingOneToOneField(TestCase):
             isinstance(
                 dummy_one_to_one_model.one_to_one_field, DummyRelationModel))
 
+
 class TestFillingForeignKey(TestCase):
-    
+
     def test_create_model_with_ForeignKey(self):
         from model_mommy.models import DummyForeignKeyModel
         from model_mommy.models import DummyRelationModel
         from model_mommy import mommy
-        
+
         dummy_foreignkey_model = mommy.make_one(DummyForeignKeyModel)
         foreignkey_field = dummy_foreignkey_model.\
             _meta.get_field('foreignkey_field')

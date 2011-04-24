@@ -139,6 +139,7 @@ class TestFillingDateFields(TestCase):
         self.assertTrue(
             isinstance(dummy_date_model.date_field, date))
 
+
 class TestFillingDateTimeFields(TestCase):
 
     def test_create_model_with_DateTimeField(self):
@@ -172,7 +173,7 @@ class TestFillingIntFields(TestCase):
         self.assertTrue(isinstance(integer_field, IntegerField))
         self.assertTrue(isinstance(integer, int))
         self.assertTrue(integer >= -2147483648)
-        self.assertTrue(integer <=  2147483647)
+        self.assertTrue(integer <= 2147483647)
 
     def test_create_model_with_BigIntegerField(self):
         from model_mommy.models import DummyIntModel
@@ -183,7 +184,7 @@ class TestFillingIntFields(TestCase):
         self.assertTrue(isinstance(big_int_field, BigIntegerField))
         self.assertTrue(isinstance(big_int, int) or isinstance(big_int, long))
         self.assertTrue(big_int >= -9223372036854775808l)
-        self.assertTrue(big_int <=  9223372036854775807l)
+        self.assertTrue(big_int <= 9223372036854775807l)
 
     def test_create_model_with_SmallIntegerField(self):
         from model_mommy.models import DummyIntModel
@@ -194,7 +195,7 @@ class TestFillingIntFields(TestCase):
         self.assertTrue(isinstance(small_int_field, SmallIntegerField))
         self.assertTrue(isinstance(small_int, int))
         self.assertTrue(small_int >= -32768)
-        self.assertTrue(small_int <=  32767)
+        self.assertTrue(small_int <= 32767)
 
 
 class TestFillingPositiveIntFields(TestCase):
@@ -231,8 +232,8 @@ class TestFillingPositiveIntFields(TestCase):
             _meta.get_field('positive_int_field')
 
         self.assertTrue(isinstance(positive_int_field, PositiveIntegerField))
-
-        self.assertTrue(isinstance(positive_int, int) or isinstance(positive_int, long))
+        self.assertTrue(isinstance(positive_int, int)\
+            or isinstance(positive_int, long))
         self.assertTrue(positive_int >= 0)
         self.assertTrue(positive_int <= 4294967295)
 

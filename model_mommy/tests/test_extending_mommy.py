@@ -3,6 +3,7 @@
 from django.test import TestCase
 from django.db.models.fields import *
 
+
 class SimpleExtendMommy(TestCase):
 
     def test_simple_extended_mommy_example(self):
