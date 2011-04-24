@@ -134,9 +134,7 @@ class UnsupportedModel(models.Model):
     unsupported_field = UnsupportedField()
 
 
-class DummyEmailModel(models.Model):
-    email_field = models.EmailField()
-
-
-class ModelWithSelfReference(models.Model):
-    self_reference = models.ForeignKey('self', null=True)
+class DummySelfReferenceModel(models.Model):
+    one_to_one_field = models.OneToOneField('self', related_name='o2o_set', null=True)
+    foreignkey_field = models.ForeignKey('self', related_name='fk_set', null=True)
+    m2m_field = models.ForeignKey('self', related_name='m2m_set', null=True)
