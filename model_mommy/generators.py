@@ -40,7 +40,6 @@ def gen_from_list(L):
 
 # -- DEFAULT GENERATORS --
 
-
 def gen_from_choices(C):
     choice_list = map(lambda x: x[0], C)
     return gen_from_list(choice_list)

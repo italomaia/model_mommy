@@ -169,11 +169,11 @@ class Mommy(object):
         `attr_mapping` and `type_mapping` can be defined easely
         overwriting the model.
         '''
-        if field.name in self.attr_mapping:
+        if field.name in self.attr_mapping:  # manual mapping
             generator = self.attr_mapping[field.name]
-        elif getattr(field, 'choices'):
+        elif getattr(field, 'choices'):  # from code choices
             generator = generators.gen_from_choices(field.choices)
-        elif field.__class__ in self.type_mapping:
+        elif field.__class__ in self.type_mapping:  # from type
             generator = self.type_mapping[field.__class__]
         else:
             raise TypeError('%s is not supported by mommy.' % field.__class__)

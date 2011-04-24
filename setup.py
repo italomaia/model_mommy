@@ -1,11 +1,12 @@
+# -*- coding:utf-8 -*-
 import sys
 import setuptools
 
 setuptools.setup(
     name="model_mommy",
-    version="0.4",
-    packages=["model_mommy",],
-    install_requires=["django",],
+    version="0.5",
+    packages=["model_mommy"],
+    install_requires=["django"],
     author="vandersonmota",
     author_email="vandersonmota@gmail.com",
     url="http://github.com/vandersonmota/model_mommy",
