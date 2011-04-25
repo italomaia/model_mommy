@@ -132,7 +132,6 @@ class Mommy(object):
         for field in self.get_fields():
             if isinstance(field, AutoField):  # auto populated
                 continue
-
             elif field.name in attrs:
                 if isinstance(field, ManyToManyField):
                     m2m_dict[field.name] = attrs.pop(field.name)

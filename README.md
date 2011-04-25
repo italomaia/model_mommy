@@ -56,6 +56,20 @@ But, if don't need a persisted object, mommy can handle this for you as well:
 
 It works like make_one, but like was said, it doesn't persist the instance.
 
+## Note 1
+
+Models that have self-referenced fields (like ForeignKey('self') and so on) are treated
+different but mommy. To avoid problems like infinite loops, the only generated
+value for these fields is None. If you want to create a model instance in which
+these fields are populated, you should do it manually.
+
+## Note 2
+
+To avoid cycles with the model factory (model A references model B that
+references model A. Not the best design, but it happens.), _fill_nullables_
+attribute default value was changed to _False_.
+
+
 ## Not so Basic Usage
 
 Model instances can also be generated from Mommy factories. Make your mass producer mom like this:

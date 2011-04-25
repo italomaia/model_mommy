@@ -54,13 +54,6 @@ class FieldFillingWithParameterTestCase(TestCase):
         self.assertEqual(person.gender, 'M')
 
 
-#class TestDefaultGenerators(TestCase):
-#    '''
-#    Default generators are those used to generate builtin django fields.
-#    '''
-#    pass
-
-
 class TestNonDefaultGenerators(TestCase):
 
     def test_attr_mapping_with_from_default_generator(self):
@@ -202,8 +195,34 @@ class TestMommyModelsWithRelations(TestCase):
 
 
 class TestAutoRefPattern(TestCase):
-    'Spooky!'
-    pass
+
+    def test_create_one_lone_penguin(self):
+        from model_mommy import mommy
+        from model_mommy.models import Penguin
+
+        penguin = mommy.make_one(Penguin)
+
+        self.assertEqual(penguin, Penguin.objects.all()[0])
+        self.assertEqual(penguin.parcel.count(), 0)
+        self.assertRaises(Penguin.DoesNotExist, lambda: penguin.mate)
+
+    def test_create_two_penguins_in_love(self):
+        from model_mommy import mommy
+        from model_mommy.models import Penguin
+
+        male = mommy.make_one(Penguin)
+        female = mommy.make_one(Penguin, partner=male)
+        self.assertEqual(male, female.mate)
+        self.assertEqual(male.partner, None)
+
+    def test_create_a_penguin_with_many_fellows(self):
+        from model_mommy import mommy
+        from model_mommy.models import Penguin
+
+        fellows = mommy.make_many(Penguin, 10)
+        penguin = mommy.make_one(Penguin, fellows=fellows)
+
+        self.assertEqual(penguin.parcel.count(), fellows.count())
 
 
 class FillNullablesTestCase(TestCase):

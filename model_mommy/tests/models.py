@@ -42,9 +42,9 @@ class Store(models.Model):
     employees = ManyToManyField(Person, related_name='employers')
 
 
-#class Penguin(models.Model):
-#    partner = OneToOneField('self')
-#    parcel = ManyToManyField('self')
+class Penguin(models.Model):
+    partner = OneToOneField('self', related_name='mate', null=True)
+    parcel = ManyToManyField('self', related_name='fellows', null=True)
 
 
 class DummyDateModel(models.Model):
