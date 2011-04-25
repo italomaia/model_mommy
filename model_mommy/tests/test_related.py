@@ -73,3 +73,44 @@ class TestFillingM2MField(TestCase):
         # relation is not created if parent model is not persisted
         self.assertEqual(DummyRelationModel.objects.count(), 0)
         self.assertRaises(ValueError, lambda: dummy_m2m_model.m2m_field)
+
+
+class TestFillingSelfReferenceModels(TestCase):
+    def test_create_self_reference_model(self):
+        from model_mommy.models import DummySelfReferenceModel
+        from model_mommy import mommy
+
+        dummy_selfref_model = mommy.make_one(DummySelfReferenceModel)
+
+    def test_filling_self_reference_ForeignKey(self):
+        from model_mommy.models import DummySelfReferenceModel
+        from model_mommy import mommy
+
+        dummy_selfref_model = mommy.make_one(DummySelfReferenceModel)
+        foreignkey_value = dummy_selfref_model.foreignkey_field
+        foreignkey_field = dummy_selfref_model._meta.get_field('foreignkey_field')
+
+        self.assertTrue(isinstance(foreignkey_field, ForeignKey))
+        self.assertTrue(foreignkey_value is None)
+
+    def test_filling_self_reference_OneToOneField(self):
+        from model_mommy.models import DummySelfReferenceModel
+        from model_mommy import mommy
+
+        dummy_selfref_model = mommy.make_one(DummySelfReferenceModel)
+        one_to_one_value = dummy_selfref_model.one_to_one_field
+        one_to_one_field = dummy_selfref_model._meta.get_field('one_to_one_field')
+
+        self.assertTrue(isinstance(one_to_one_field, OneToOneField))
+        self.assertTrue(one_to_one_value is None)
+
+    def test_filling_self_reference_M2MField(self):
+        from model_mommy.models import DummySelfReferenceModel
+        from model_mommy import mommy
+
+        dummy_selfref_model = mommy.make_one(DummySelfReferenceModel)
+        m2m_value = dummy_selfref_model.m2m_field
+        m2m_field = dummy_selfref_model._meta.get_field('m2m_field')
+
+        self.assertTrue(isinstance(m2m_field, ManyToManyField))
+        self.assertTrue(m2m_value is None)
