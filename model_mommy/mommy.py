@@ -132,6 +132,7 @@ class Mommy(object):
             elif type(field) in (ForeignKey, OneToOneField, ManyToManyField)\
                 and (field.related.parent_model == self.model) and field.null:
                 pass
+
             elif isinstance(field, ManyToManyField):
 
                 if field.name in attrs:
