@@ -137,4 +137,4 @@ class UnsupportedModel(models.Model):
 class DummySelfReferenceModel(models.Model):
     one_to_one_field = models.OneToOneField('self', related_name='o2o_set', null=True)
     foreignkey_field = models.ForeignKey('self', related_name='fk_set', null=True)
-    m2m_field = models.ForeignKey('self', related_name='m2m_set', null=True)
+    m2m_field = models.ManyToManyField('self', related_name='m2m_set', null=True)
