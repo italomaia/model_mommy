@@ -92,7 +92,7 @@ class Mommy(object):
     attr_mapping = {}
     type_mapping = None
 
-    def __init__(self, model, fill_nullables=True):
+    def __init__(self, model, fill_nullables=False):
         '''Set fill_nullables to False if you want fields that can receive
         null values to be left blank by default. You can still overwrite
         nullable fields manually.'''
@@ -103,45 +103,48 @@ class Mommy(object):
 
     def make_one(self, **attrs):
         '''Creates and persists an instance of the model
-        associated with Mommy instance.'''
+        associated with Mommy.'''
 
         return self._make_one(commit=True, **attrs)
 
     def prepare(self, **attrs):
-        '''Creates, but do not persists, an instance of the model
-        associated with Mommy instance.'''
+        '''Creates, but does not persists, an instance of the model
+        associated with Mommy.'''
         self.type_mapping[ForeignKey] = prepare_one
         return self._make_one(commit=False, **attrs)
 
     def get_fields(self):
         return self.model._meta.fields + self.model._meta.many_to_many
 
-    #Method too big
     def _make_one(self, commit=True, **attrs):
-        # dict of m2m fields for current model
-        m2m_dict = {}
+        '''
+        Attributes:
+        - attrs - dictionary of attributes that should be manually filled
+        - commit - should created model instance be persisted in the database?
+
+        Each field not informed in attrs is resolved like this:
+        * If field is a reference to its own model, field is left blank.
+        * If field accepts null and fill_nullables is False, field is left blank.
+        * All other cases, a random value is created for the field.
+        '''
+        m2m_dict = {}  # dict of m2m fields for current model
 
         for field in self.get_fields():
             if isinstance(field, AutoField):  # auto populated
                 continue
 
-            # should be left blank?
-            if field.null and not self.fill_nullables:
-                continue
-
-            elif type(field) in (ForeignKey, OneToOneField, ManyToManyField)\
-                and (field.related.parent_model == self.model) and field.null:
-                pass
-
-            elif isinstance(field, ManyToManyField):
-
-                if field.name in attrs:
+            elif field.name in attrs:
+                if isinstance(field, ManyToManyField):
                     m2m_dict[field.name] = attrs.pop(field.name)
-                else:
+            else:
+                if type(field) in (ForeignKey, OneToOneField, ManyToManyField) and (field.related.parent_model == self.model) and field.null:
+                    continue
+                elif field.null and not self.fill_nullables:  # leave blank?
+                    continue
+                elif isinstance(field, ManyToManyField):
                     m2m_dict[field.name] = self.generate_value(field)
-
-            elif not field.name in attrs:
-                attrs[field.name] = self.generate_value(field)
+                else:
+                    attrs[field.name] = self.generate_value(field)
 
         instance = self.model(**attrs)
 

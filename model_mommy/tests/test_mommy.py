@@ -184,7 +184,7 @@ class TestMommyModelsWithRelations(TestCase):
 
         store = mommy.make_one(Store)
         self.assertEqual(store.employees.count(), 5)
-        self.assertEqual(store.customers.count(), 5)
+        self.assertEqual(store.customers.count(), 0)
 
     def test_provide_initial_to_many_to_many(self):
         from model_mommy.models import Person, Store
