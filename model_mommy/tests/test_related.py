@@ -113,4 +113,4 @@ class TestFillingSelfReferenceModels(TestCase):
         m2m_field = dummy_selfref_model._meta.get_field('m2m_field')
 
         self.assertTrue(isinstance(m2m_field, ManyToManyField))
-        self.assertTrue(m2m_value is None)
+        self.assertEqual(m2m_value.count(), 0)

@@ -129,6 +129,9 @@ class Mommy(object):
             if field.null and not self.fill_nullables:
                 continue
 
+            elif type(field) in (ForeignKey, OneToOneField, ManyToManyField)\
+                and (field.related.parent_model == self.model) and field.null:
+                pass
             elif isinstance(field, ManyToManyField):
 
                 if field.name in attrs:
