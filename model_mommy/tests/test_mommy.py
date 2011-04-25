@@ -212,17 +212,18 @@ class TestAutoRefPattern(TestCase):
 
         male = mommy.make_one(Penguin)
         female = mommy.make_one(Penguin, partner=male)
-        self.assertEqual(male, female.mate)
-        self.assertEqual(male.partner, None)
+        self.assertEqual(male, female.partner)
+        self.assertEqual(male.mate, female)
 
     def test_create_a_penguin_with_many_fellows(self):
         from model_mommy import mommy
         from model_mommy.models import Penguin
 
         fellows = mommy.make_many(Penguin, 10)
-        penguin = mommy.make_one(Penguin, fellows=fellows)
+        penguin = mommy.make_one(Penguin, parcel=fellows)
 
-        self.assertEqual(penguin.parcel.count(), fellows.count())
+        self.assertEqual(penguin.parcel.count(),
+            Penguin.objects.exclude(id=penguin.id).count())
 
 
 class FillNullablesTestCase(TestCase):
