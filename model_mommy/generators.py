@@ -18,7 +18,12 @@ import datetime
 from decimal import Decimal
 from random import randint, choice, random
 
-MAX_LENGTH = 300
+MIN_INT, MAX_INT = -2147483648, 2147483647
+MIN_BIG_INT, MAX_BIG_INT = -9223372036854775808l, 9223372036854775807l
+MIN_SMALL_INT, MAX_SMALL_INT = -32768, 32767
+
+TEXT_LENGTH = 300
+
 DOMAIN_EXT_LIST = (
     '.com', '.co', '.info', '.net', '.org', '.me', '.mobi', '.us',
     '.biz', '.mx', '.ca', '.ws', '.ag', '.com.co', '.net.co', '.nom.co',
@@ -130,6 +135,7 @@ class Mapper(object):
 
     def value_for_ipaddressfield(self, field):
         '''
+        Generates a valid IPAddress
         Not allowed:
         [0] 10.x.x.x
         [1] 192.168.x.x
@@ -150,30 +156,37 @@ class Mapper(object):
                 break
         return '.'.join(ip_address)
 
-    def value_for_integerfield(self, min=-2147483647, max=2147483647):
+    def value_for_integerfield(self, min=MIN_INT, max=MAX_INT):
         '''
         Creates a random 32bits integer.
 
         '''
         return randint(min, max)
 
-    def value_for_positiveintegerfield(self, min=0, max=2147483647):
+    def value_for_positiveintegerfield(self, min=0, max=MAX_INT * 2 + 1):
         '''
         Creates a random 32bits integer.
 
         '''
         return randint(min, max)
 
-    def value_for_smallintegerfield(self, min=-32768, max=32768):
+    def value_for_smallintegerfield(self, min=MIN_SMALL_INT, max=MAX_SMALL_INT):
         '''
         Creates a random 16bits integer.
 
         '''
         return randint(min, max)
 
-    def value_for_positivesmallintegerfield(self, min=0, max=32768):
+    def value_for_positivesmallintegerfield(self, min=0, max=MAX_SMALL_INT * 2 + 1):
         '''
         Creates a random 16bits integer.
+
+        '''
+        return randint(min, max)
+
+    def value_for_bigintegerfield(self, min=MIN_BIG_INT, max=MAX_BIG_INT):
+        '''
+        Creates a random 64bits integer.
 
         '''
         return randint(min, max)
@@ -225,6 +238,7 @@ class Mapper(object):
         '''
         Creates a random size slug string with length up to
         field.max_length.
+
         '''
         char_table = string.letters + string.digits + '-_'
         return self.raw_string(
@@ -233,6 +247,7 @@ class Mapper(object):
     def value_for_charfield(self, field):
         '''
         Creates a random size string with length up to field.max_length.
+
         '''
         return self.raw_string(
             randint(1, field.max_length), string.printable)
@@ -240,6 +255,7 @@ class Mapper(object):
     def value_for_textfield(self, field):
         '''
         Creates a random size string with length up to MAX_LENGTH.
+
         '''
         return self.raw_string(
             randint(1, MAX_LENGTH), string.printable)
