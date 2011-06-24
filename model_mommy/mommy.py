@@ -6,11 +6,14 @@ from . import utils
 import string
 import datetime
 from decimal import Decimal
-from random import choice, randint
+from random import choice, randint, random
 
-MIN_INT, MAX_INT = -2147483648, 2147483647
-MIN_BIG_INT, MAX_BIG_INT = -9223372036854775808l, 9223372036854775807l
 MIN_SMALL_INT, MAX_SMALL_INT = -32768, 32767
+POS_MAX_SMALL_INT = 32767 * 2 +1
+MIN_INT, MAX_INT = -2147483648, 2147483647
+POS_MAX_INT = 2147483647 * 2 + 1
+MIN_BIG_INT, MAX_BIG_INT = -9223372036854775808l, 9223372036854775807l
+
 
 TEXT_LENGTH = 300
 
@@ -29,20 +32,10 @@ def make_many(model, qty=5, **attrs):
     return [mom.make(model, attrs) for i in range(qty)]
 
 
-def prepare_one(model, **attrs):
-    mom = Mommy()
-    return mom.make(model, attrs, commit=False)
-
-
-def prepare_many(model, qty=5, **attrs):
-    mom = Mommy()
-    return [mom.make(model, attrs, commit=False) for i in range(qty)]
-
-
 class Mommy(object):
     ''''''
 
-    def __init__(self, model, fill_nullable=False, use_default=False):
+    def __init__(self, fill_nullable=False, use_default=False):
         '''
         Keyword arguments:
         -- fill_nullable - If True, all fields with null=True will
@@ -86,8 +79,7 @@ class Mommy(object):
                 continue
             else:
                 break
-
-        return '.'.join(ip_address)
+        return '.'.join([str(token) for token in ip_address])
 
     def value_for_autofield(self, field):
         return None
@@ -104,7 +96,7 @@ class Mommy(object):
         Creates a random 32bits integer.
 
         '''
-        return randint(0, MAX_INT * 2 + 1)
+        return randint(0, POS_MAX_INT)
 
     def value_for_smallintegerfield(self, field):
         '''
@@ -118,7 +110,7 @@ class Mommy(object):
         Creates a random 16bits integer.
 
         '''
-        return randint(0, MAX_SMALL_INT * 2 + 1)
+        return randint(0, POS_MAX_SMALL_INT)
 
     def value_for_bigintegerfield(self, field):
         '''
@@ -137,7 +129,7 @@ class Mommy(object):
             field.max_digits, field.decimal_places
 
         num_as_str = lambda max_length: utils.raw_string(
-            ranint(1, max_length), string.digits)
+            randint(1, max_length), string.digits)
 
         return Decimal('%s.%s' % (
             num_as_str(max_digits - decimal_places),
@@ -176,7 +168,7 @@ class Mommy(object):
         Creates a random float value.
 
         '''
-        return random() * self.gen_integer()
+        return random() * randint(MIN_INT, MAX_INT)
 
     def value_for_datefield(self, field):
         '''
@@ -218,10 +210,10 @@ class Mommy(object):
 
         '''
         return utils.raw_string(
-            randint(1, MAX_LENGTH), string.printable)
+            randint(1, TEXT_LENGTH), string.printable)
 
     def value_for_xmlfield(self, field):
-        raise Exception('Not implemented')
+        return utils.raw_xml()
 
     def value_for_urlfield(self, field):
         '''
@@ -297,33 +289,50 @@ class Mommy(object):
         '''
         return choice((None, True, False))
 
+    def value_for_genericrelation(self, field):
+        pass
+
+    def value_for_onetoonefield(self, field):
+        return self.value_for_foreignkey(field)
+
     def value_for_foreignkey(self, field):
         '''
         Generates a new model instance for given field related model.
         '''
         field_model = field.related.parent_model
-        return Mommy(field_model).make()
+        return self.make(field_model)
 
-    def make(self, model, attrs=None, m2m_attrs=None, commit=True):
+    def value_for_manytomanyfield(self, field):
+        '''
+        Generates five new model instances for the given field related
+        model.
+        '''
+        field_model = field.related.parent_model
+        mom = Mommy()
+        return [mom.make(field_model) for i in range(5)]
+
+    def make(self, model, attrs=None):
         attrs = attrs or {}
-        m2m_attrs = m2m_attrs or {}
+        m2m_attrs = {}
 
         for field in self.get_fields(model):
             if field.name not in attrs:
                 attrs[field.name] = self.resolve(field)
 
         for field in self.get_m2m_fields(model):
-            if field.name not in m2m_attrs:
+            if field.name in attrs:
+                m2m_attrs[field.name] = attrs.pop(field.name)
+            else:
                 m2m_attrs[field.name] = self.resolve(field)
 
         instance = model(**attrs)
-        if commit:
-            instance.save()
-            if m2m_attrs:  # m2m only for persisted instances
-                for name, value in m2m_attrs.items():
+        instance.save()
+
+        if m2m_attrs:
+            for name, value in m2m_attrs.items():
+                if value is not None:
                     m2m_relation = getattr(instance, name)
                     for m2m_instance in value:
-                        m2m_instance.save()
                         m2m_relation.add(m2m_instance)
         return instance
 
