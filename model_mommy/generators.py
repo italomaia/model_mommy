@@ -42,7 +42,6 @@ DOMAIN_EXT_LIST = (
 
 class Mapper(object):
     ''''''
-    fields = property(get_fields)
 
     def __init__(self, fill_nullable=False, use_default=False):
         '''
@@ -322,6 +321,7 @@ class Mapper(object):
     def get_fields(self, model):
         '''Returns a mapped dict with all non m2m fields from the model'''
         return model._meta.fields
+    fields = property(get_fields)
 
     def get_m2m_fields(self, model):
         '''Returns a mapped dict with all manytomany fields from the model'''
