@@ -6,6 +6,8 @@ from django.db.models.fields.files import *
 from django.test import TestCase
 import django
 
+from decimal import Decimal
+
 if django.VERSION < (1, 2):
     BigIntegerField = IntegerField
 
@@ -78,7 +80,22 @@ class TestFillingStringFields(TestCase):
             isinstance(dummy_text_model.text_field, basestring))
 
 
-class TestFillingEmailField(TestCase):
+class TestFillingXMLFields(TestCase):
+    def test_create_model_with_xml_field(self):
+        from model_mommy import mommy
+        from model_mommy.models import DummyXMLModel
+        from xml.dom.minidom import parseString, Document
+
+        dummy_model = mommy.make_one(DummyXMLModel)
+        xml_field = DummyXMLModel._meta.get_field('xml_field')
+        xml_value = dummy_model.xml_field
+
+        self.assertTrue(isinstance(xml_field, XMLField))
+        self.assertTrue(isinstance(xml_value, basestring))
+        self.assertTrue(isinstance(parseString(xml_value), Document))
+
+
+class TestFillingEmailFields(TestCase):
 
     def test_create_model_with_email_field(self):
         from model_mommy import mommy
@@ -139,6 +156,7 @@ class TestFillingDateFields(TestCase):
         self.assertTrue(
             isinstance(dummy_date_model.date_field, date))
 
+
 class TestFillingDateTimeFields(TestCase):
 
     def test_create_model_with_DateTimeField(self):
@@ -153,6 +171,23 @@ class TestFillingDateTimeFields(TestCase):
         self.assertTrue(isinstance(datetime_field, DateTimeField))
         self.assertTrue(
             isinstance(dummy_datetime_model.datetime_field, date))
+
+
+class TestFillingIPAddressFields(TestCase):
+
+    def test_create_model_withIPAddressField(self):
+        from model_mommy import mommy
+        from model_mommy.models import IPAddressModel
+
+        dummy_ipaddress_model = mommy.make_one(IPAddressModel)
+        ip_address_value = dummy_ipaddress_model.ip_address_field
+
+        tokens = ip_address_value.split('.')
+
+        for token in tokens:
+            self.assertTrue(token.isdigit())
+
+        self.assertEqual(len(tokens), 4)  # IPV4 only
 
 
 class TestFillingIntFields(TestCase):
@@ -201,32 +236,36 @@ class TestFillingPositiveIntFields(TestCase):
 
     def test_create_model_with_PositiveSmallIntegerField(self):
         from model_mommy.models import DummyPositiveIntModel
+        from model_mommy.mommy import POS_MAX_SMALL_INT
 
+        dummy_model = self.dummy_positive_int_model
+
+        positive_small_int_value = dummy_model.positive_small_int_field
         positive_small_int_field = DummyPositiveIntModel.\
             _meta.get_field('positive_small_int_field')
 
         self.assertTrue(isinstance(
             positive_small_int_field, PositiveSmallIntegerField))
 
-        positive_small_int_field = \
-            self.dummy_positive_int_model.positive_small_int_field
-
-        self.assertTrue(isinstance(positive_small_int_field, int))
-        self.assertTrue(positive_small_int_field >= 0)
-        self.assertTrue(positive_small_int_field <= 65535)
+        self.assertTrue(isinstance(positive_small_int_value, int))
+        self.assertTrue(positive_small_int_value >= 0)
+        self.assertTrue(positive_small_int_value <= POS_MAX_SMALL_INT)
 
     def test_create_model_with_PositiveIntegerField(self):
         from model_mommy.models import DummyPositiveIntModel
+        from model_mommy.mommy import POS_MAX_INT
 
+        dummy_model = self.dummy_positive_int_model
+
+        positive_int_value = dummy_model.positive_int_field
         positive_int_field = DummyPositiveIntModel.\
             _meta.get_field('positive_int_field')
 
-        self.assertTrue(isinstance(positive_int_field, PositiveIntegerField))
-
-        self.assertTrue(isinstance(
-            self.dummy_positive_int_model.positive_int_field, int))
         self.assertTrue(
-            self.dummy_positive_int_model.positive_int_field >= 0)
+            isinstance(positive_int_field, PositiveIntegerField))
+
+        self.assertTrue(positive_int_value >= 0)
+        self.assertTrue(positive_int_value <= POS_MAX_INT)
 
 
 class TestFillingOthersNumericFields(TestCase):
@@ -246,13 +285,14 @@ class TestFillingOthersNumericFields(TestCase):
         from model_mommy import mommy
         from model_mommy.models import DummyDecimalModel
 
-        self.dummy_decimal_model = mommy.make_one(DummyDecimalModel)
+        dummy_model = mommy.make_one(DummyDecimalModel)
+
         decimal_field =\
             DummyDecimalModel._meta.get_field('decimal_field')
 
         self.assertTrue(isinstance(decimal_field, DecimalField))
         self.assertTrue(isinstance(
-            self.dummy_decimal_model.decimal_field, basestring))
+            dummy_model.decimal_field, Decimal))
 
 
 class TestFillingURLFields(TestCase):

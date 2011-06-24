@@ -75,6 +75,10 @@ class DummyEmailModel(models.Model):
     email_field = EmailField()
 
 
+class DummyXMLModel(models.Model):
+    xml_field = XMLField()
+
+
 class DummyIntModel(models.Model):
     int_field = IntegerField()
     small_int_field = SmallIntegerField()
@@ -106,7 +110,15 @@ class DummyImageModel(models.Model):
     image_field = FileField(upload_to='images')
 
 
+class IPAddressModel(models.Model):
+    ip_address_field = IPAddressField()
+
+
 class DummyRelationModel(models.Model):
+    pass
+
+
+class DummyGenericRelationModel(models.Model):
     pass
 
 
