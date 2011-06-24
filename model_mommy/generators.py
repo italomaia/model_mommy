@@ -321,7 +321,6 @@ class Mapper(object):
     def get_fields(self, model):
         '''Returns a mapped dict with all non m2m fields from the model'''
         return model._meta.fields
-    fields = property(get_fields)
 
     def get_m2m_fields(self, model):
         '''Returns a mapped dict with all manytomany fields from the model'''
