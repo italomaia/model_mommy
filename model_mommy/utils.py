@@ -9,6 +9,18 @@ import string
 from random import randint, choice
 from xml.dom.minidom import parseString
 
+DOMAIN_EXT_LIST = (
+    '.com', '.co', '.info', '.net', '.org', '.me', '.mobi', '.us',
+    '.biz', '.mx', '.ca', '.ws', '.ag', '.com.co', '.net.co', '.nom.co',
+    '.com.ag', '.net.ag', '.it', '.fr', '.org.ag', '.am', '.asia',
+    '.at', '.be', '.bz', '.se', '.com.bz', '.net.bz', '.net.br', '.vg',
+    '.com.br', '.cc', '.de', '.es', '.com.es', '.nom.es', '.org.es',
+    '.eu', '.fm', '.gs', '.in', '.co.in', '.firm.in', '.gen.in', '.tv',
+    '.ind.in', '.net.in', '.org.in', '.jobs', '.jp', '.ms', '.com.mx',
+    '.nl', '.nu', '.co.nz', '.net.nz', '.org.nz', '.tc', '.tk',
+    '.tw', '.com.tw', '.idv.tw', '.co.uk', '.me.uk', '.org.uk')
+
+
 def raw_string(length, table):
     '''
     Creates a random string with length equal to `length` using
@@ -21,6 +33,7 @@ def raw_string(length, table):
 
     '''
     return u''.join([choice(table) for i in range(length)])
+
 
 def raw_filename(length, ext_list):
     '''
@@ -41,8 +54,9 @@ def raw_filename(length, ext_list):
     '''
     char_table = re.sub(r'[/\?%*:|"<>]', '', string.printable)
     ext = '.%s' % choice(ext_list)
-    name = self.raw_string(max_length - len(ext), char_table)
+    name = raw_string(max_length - len(ext), char_table)
     return name + ext
+
 
 def raw_hostname(length):
     '''
@@ -65,6 +79,7 @@ def raw_hostname(length):
 
     return hostname
 
+
 def raw_domain(length, domain_ext_list=None):
     '''
     Creates a random valid domain name with one of the extensions
@@ -86,9 +101,10 @@ def raw_domain(length, domain_ext_list=None):
 
         # -1 for the dot separating hostnames
         length = length - newhost_length - 1
-        hostnames.append(self.raw_hostname(newhost_length))
+        hostnames.append(raw_hostname(newhost_length))
 
     return '.'.join(hostnames) + ext
+
 
 def raw_tagname(size=12):
     '''
@@ -99,6 +115,7 @@ def raw_tagname(size=12):
     # string_ascii_lowercase used for simplicity
     return raw_string(randint(1, size), string.ascii_lowercase + "_")
 
+
 def raw_xml():
     '''
     Creates a random xml string. Final result can be pretty big.
@@ -106,10 +123,12 @@ def raw_xml():
     '''
 
     def add_children(doc, element, level=0):
-        new_element = doc.createElement(u"" % raw_tagname)
+        new_element = doc.createElement(raw_tagname())
 
         if choice((True, False)):
-            text_node = doc.createTextNode(raw_string(randint(1, 100), string.printable))
+            text_node = doc.createTextNode(
+                raw_string(randint(1, 100), string.printable))
+
             new_element.childNodes.append(text_node)
 
         if level < 5 and choice((True, False)):

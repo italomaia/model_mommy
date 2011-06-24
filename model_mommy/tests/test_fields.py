@@ -30,7 +30,7 @@ class TestFillingSlugField(TestCase):
     def is_slug(self, slug):
         import string
 
-        slug_table = string.lowercase + string.digits + '_-'
+        slug_table = string.letters + string.digits + '_-'
         for char in slug:
             if char not in slug_table:
                 return False
@@ -100,7 +100,7 @@ class TestFillingEmailField(TestCase):
 
         dummy_email_model = mommy.make_one(DummyEmailModel)
         data = dummy_email_model.email_field
-        
+
         table = string.letters + string.digits + "!#$%&'*+-/=?^_`{|}~."
 
         m = re.match(r"[%(t)s]+@[%(t)s](\.[%(t)s]+)*" % {'t': table}, data)
@@ -177,7 +177,7 @@ class TestFillingIntFields(TestCase):
         big_int_field = DummyIntModel._meta.get_field('big_int_field')
         self.assertTrue(isinstance(big_int_field, BigIntegerField))
 
-        self.assertTrue(isinstance(self.dummy_int_model.big_int_field, int))
+        self.assertTrue(isinstance(self.dummy_int_model.big_int_field, long))
 
     def test_create_model_with_SmallIntegerField(self):
         from model_mommy.models import DummyIntModel
@@ -213,7 +213,7 @@ class TestFillingPositiveIntFields(TestCase):
 
         self.assertTrue(isinstance(positive_small_int_field, int))
         self.assertTrue(positive_small_int_field >= 0)
-        self.assertTrue(positive_small_int_field <= 32768)
+        self.assertTrue(positive_small_int_field <= 65535)
 
     def test_create_model_with_PositiveIntegerField(self):
         from model_mommy.models import DummyPositiveIntModel
@@ -270,14 +270,14 @@ class TestFillingURLFields(TestCase):
 
 
 class TestFillingFileFields(TestCase):
-    
+
     def test_create_model_with_FileField(self):
         from model_mommy import mommy
         from model_mommy.models import DummyFileModel
-        
+
         dummy_file_model = mommy.make_one(DummyFileModel)
         file_field = dummy_file_model._meta.get_field('file_field')
-        
+
         self.assertTrue(isinstance(file_field, FileField))
         self.assertTrue(
             isinstance(dummy_file_model.file_field.url, basestring))
@@ -285,7 +285,7 @@ class TestFillingFileFields(TestCase):
     def test_create_model_with_ImageField(self):
         from model_mommy import mommy
         from model_mommy.models import DummyImageModel
-        
+
         dummy_image_model = mommy.make_one(DummyImageModel)
         image_field = dummy_image_model._meta.get_field('image_field')
 

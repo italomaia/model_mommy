@@ -55,47 +55,6 @@ class FieldFillingWithParameterTestCase(TestCase):
         self.assertEqual(person.gender, 'M')
 
 
-#class TestDefaultGenerators(TestCase):
-#    '''
-#    Default generators are those used to generate builtin django fields.
-#    '''
-#    pass
-
-
-class TestNonDefaultGenerators(TestCase):
-
-    def test_attr_mapping_with_from_default_generator(self):
-        from model_mommy.generators import gen_from_default
-        from model_mommy.mommy import Mommy
-        from model_mommy.models import Person
-
-        class HappyPersonMommy(Mommy):
-            attr_mapping = {'happy': gen_from_default}
-
-        happy_field = Person._meta.get_field('happy')
-        mom = HappyPersonMommy(Person)
-        person = mom.make_one()
-        self.assertTrue(person.happy == happy_field.default)
-
-    def test_attr_mapping_with_from_list_generator(self):
-        from model_mommy.mommy import Mommy
-        from model_mommy.models import Person
-        from model_mommy.generators import gen_from_list
-
-        age_list = range(4, 12)
-
-        class KidMommy(Mommy):
-            attr_mapping = {
-                'age': gen_from_list(age_list)
-            }
-
-        mom = KidMommy(Person)
-        kid = mom.make_one()
-
-        # person's age belongs to informed list?
-        self.assertTrue(kid.age in age_list)
-
-
 class TestMommyAPI(TestCase):
 
     def test_make_one_should_create_one_object(self):
