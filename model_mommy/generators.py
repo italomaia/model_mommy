@@ -19,6 +19,7 @@ import datetime
 from decimal import Decimal
 from random import randint, choice, random
 
+import django
 from . import utils
 
 MIN_INT, MAX_INT = -2147483648, 2147483647
@@ -39,6 +40,9 @@ DOMAIN_EXT_LIST = (
     '.tw', '.com.tw', '.idv.tw', '.co.uk', '.me.uk', '.org.uk'
 )
 
+if django.VERSION < (1, 2):
+    MIN_BIG_INT, MAX_BIG_INT = MIN_INT, MAX_INT
+
 
 class Mapper(object):
     ''''''
@@ -58,6 +62,7 @@ class Mapper(object):
         '''
         Returns a value from one of the possible values defined in
         field.choices.
+
         '''
         return choice(map(lambda c: c[0], field.choices))
 
@@ -292,10 +297,13 @@ class Mapper(object):
         return choice((None, True, False))
 
     def value_for_foreignkey(self, field):
+        '''
+        Generates a new model instance for given field related model.
+        '''
         field_model = field.related.parent_model
-        return Mapper(field_model).make_one()
+        return Mapper(field_model).make()
 
-    def make_one(self, model, attrs=None, m2m_attrs=None, commit=True):  # TODO
+    def make(self, model, attrs=None, m2m_attrs=None, commit=True):
         attrs = attrs or {}
         m2m_attrs = m2m_attrs or {}
 
