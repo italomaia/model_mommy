@@ -50,8 +50,7 @@ class Mapper(object):
         >>> assert all(map(lambda c: c in string.letters, output))
 
         '''
-        return u''.join([choice(table) for
-            i in range(length)])
+        return u''.join([choice(table) for i in range(length)])
 
     @staticmethod
     def raw_filename(length, ext_list):
@@ -76,7 +75,8 @@ class Mapper(object):
         name = self.raw_string(max_length - len(ext), char_table)
         return name + ext
 
-    def raw_hostname(self, length):
+    @staticmethod
+    def raw_hostname(length):
         '''
         Creates a hostname with length equal to informed length.
 
@@ -87,14 +87,18 @@ class Mapper(object):
         char_table = string.ascii_letters + string.digits
         char_table_ = string.ascii_letters + string.digits + '-'
         hostname = ''
+
         while len(hostname) < length:
+            # hostname can't start nor end in dot
             if len(hostname) == 0 or len(hostname) == length - 1:
                 hostname += choice(char_table)
             else:
                 hostname += choice(char_table_)
+
         return hostname
 
-    def raw_domain(self, length, domain_ext_list=None):
+    @staticmethod
+    def raw_domain(length, domain_ext_list=None):
         '''
         Creates a random valid domain name with one of the extensions
         informed in domain_ext_list. If not informed, an extension from
@@ -104,6 +108,7 @@ class Mapper(object):
 
         '''
         assert length < 256, 'length is too big'
+
         ext_list = domain_ext_list or DOMAIN_EXT_LIST
         ext = choice(ext_list)
         length -= len(ext)
@@ -111,14 +116,17 @@ class Mapper(object):
         hostnames = []
         while length > 1:
             newhost_length = randint(1, min(63, length))
+
+            # -1 for the dot separating hostnames
             length = length - newhost_length - 1
             hostnames.append(self.raw_hostname(newhost_length))
+
         return '.'.join(hostnames) + ext
 
-    def __init__(self, fill_nullable=True, use_default=False):
+    def __init__(self, fill_nullable=False, use_default=False):
         '''
         Keyword arguments:
-        -- fill_nullable - If False, all fields with null=True will receive None.
+        -- fill_nullable - If True, all fields with null=True will receive value.
         -- use_default - If True, all fields with default value defined
         will be filled from default value.
 
@@ -135,11 +143,13 @@ class Mapper(object):
 
     def value_for_ipaddressfield(self, field):
         '''
-        Generates a valid IPAddress
+        Generates a valid IPV4 for IPAddress
+
         Not allowed:
-        [0] 10.x.x.x
-        [1] 192.168.x.x
-        [2] 172.16.0.0 to 172.31.255.255
+        - [0] 10.x.x.x
+        - [1] 192.168.x.x
+        - [2] 172.16.0.0 to 172.31.255.255
+
         '''
         ip_address = None
 
@@ -148,12 +158,13 @@ class Mapper(object):
                 randint(0, 255), randint(0, 255),
                 randint(0, 255), randint(0, 255)]
 
-            if ip_address[0] == 10  # filter [0]
-            or (ip_address[0] == 192 and ip_address[1] == 168)  # filter [1]
-            or (ip_address >= [172, 16, 0, 0] and ip_address <= [172, 31, 255, 255]):  # filter [2]
+            if (ip_address[0] == 10) or\
+                (ip_address[0] == 192 and ip_address[1] == 168) or\
+                (ip_address >= [172, 16, 0, 0] and ip_address <= [172, 31, 255, 255]):
                 continue
             else:
                 break
+
         return '.'.join(ip_address)
 
     def value_for_integerfield(self, min=MIN_INT, max=MAX_INT):

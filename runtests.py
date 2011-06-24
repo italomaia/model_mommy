@@ -11,6 +11,7 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'test_settings'
 
 def runtests():
     args = sys.argv[1:]
+
     if args:
         test_labels = ["model_mommy.%s" % arg for arg in args]
     else:
