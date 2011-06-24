@@ -5,7 +5,9 @@ Some useful functions if you plan on overwriting any
 mommy methods.
 '''.strip()
 
+import re
 import string
+
 from random import randint, choice
 from xml.dom.minidom import parseString
 
@@ -54,7 +56,7 @@ def raw_filename(length, ext_list):
     '''
     char_table = re.sub(r'[/\?%*:|"<>]', '', string.printable)
     ext = '.%s' % choice(ext_list)
-    name = raw_string(max_length - len(ext), char_table)
+    name = raw_string(length - len(ext), char_table)
     return name + ext
 
 
@@ -125,14 +127,19 @@ def raw_xml():
     def add_children(doc, element, level=0):
         new_element = doc.createElement(raw_tagname())
 
-        if choice((True, False)):
+        if choice((True, True, False)):
             text_node = doc.createTextNode(
                 raw_string(randint(1, 100), string.printable))
 
             new_element.childNodes.append(text_node)
 
+        element.childNodes.append(new_element)
+
+        if choice((True, False)):
+            add_children(doc, element, level)
+
         if level < 5 and choice((True, False)):
-            add_children(doc, element, level + 1)
+            add_children(doc, new_element, level + 1)
 
     # doc with random name
     doc = parseString(u'<%s />' % raw_tagname())
