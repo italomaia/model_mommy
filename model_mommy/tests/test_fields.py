@@ -21,12 +21,6 @@ class HandlingModelsWithUnsupportedFields(TestCase):
         self.assertRaises(TypeError, lambda: mommy.make_one(UnsupportedModel))
 
 
-class TestFillingFileFields(TestCase):
-
-    def test_create_model_with_file_field(self):
-        pass
-
-
 class TestFillingSlugField(TestCase):
 
     def is_slug(self, slug):
