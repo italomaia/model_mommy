@@ -12,84 +12,33 @@ class SimpleExtendMommy(TestCase):
         class Aunt(Mommy):
             pass
 
-        aunt = Aunt(Person)
-        self.cousin = aunt.make_one()
+        aunt = Aunt()
+        self.cousin = aunt.make(Person)
 
-    def test_type_mapping_overwriting_boolean_model_behavior(self):
+    def test_overwriting_happy_field_behavior(self):
         from model_mommy.mommy import Mommy
         from model_mommy.models import Person
 
         class SadPeopleMommy(Mommy):
-            def __init__(self, model):
-                super(SadPeopleMommy, self).__init__(model)
-                self.type_mapping.update({
-                    BooleanField: lambda: False
-                })
+            def value_for_happy(self, field):
+                return False
 
-        sad_people_mommy = SadPeopleMommy(Person)
-        person = sad_people_mommy.make_one()
+        sad_people_mommy = SadPeopleMommy()
+        person = sad_people_mommy.make(Person)
 
         # making sure this person is sad >:D
         self.assertEqual(person.happy, False)
 
-
-class LessSimpleExtendMommy(TestCase):
-
-    def test_fail_no_field_attr_string_to_generator_required(self):
+    def test_overwriting_boolean_field_behavior(self):
         from model_mommy.mommy import Mommy
         from model_mommy.models import Person
-
-        gen_oposite = lambda x: not x
-        gen_oposite.required = ['house']
 
         class SadPeopleMommy(Mommy):
-            attr_mapping = {'happy': gen_oposite}
+            def value_for_booleanfield(self, field):
+                return False
 
-        mom = SadPeopleMommy(Person)
-        self.assertRaises(AttributeError, lambda: mom.make_one())
+        sad_people_mommy = SadPeopleMommy()
+        person = sad_people_mommy.make(Person)
 
-    def test_string_to_generator_required(self):
-        from model_mommy.mommy import Mommy
-        from model_mommy.models import Person
-
-        gen_oposite = lambda default: not default
-        gen_oposite.required = ['default']
-
-        class SadPeopleMommy(Mommy):
-            attr_mapping = {'happy': gen_oposite}
-
-        happy_field = Person._meta.get_field('happy')
-        mom = SadPeopleMommy(Person)
-        person = mom.make_one()
-        self.assertEqual(person.happy, not happy_field.default)
-
-    def test_fail_pass_non_string_to_generator_required(self):
-        from model_mommy.mommy import Mommy
-        from model_mommy.models import Person
-
-        gen_age = lambda x: 10
-
-        class MyMommy(Mommy):
-            attr_mapping = {'age': gen_age}
-
-        mom = MyMommy(Person)
-
-        # for int
-        gen_age.required = [10]
-        self.assertRaises(ValueError, lambda: mom.make_one())
-
-        # for float
-        gen_age.required = [10.10]
-        self.assertRaises(ValueError, lambda: mom.make_one())
-
-        # for iterable
-        gen_age.required = [[]]
-        self.assertRaises(ValueError, lambda: mom.make_one())
-
-        # for iterable/dict
-        gen_age.required = [{}]
-        self.assertRaises(ValueError, lambda: mom.make_one())
-
-        # for boolean
-        gen_age.required = [True]
-        self.assertRaises(ValueError, lambda: mom.make_one())
+        # making sure this person is sad >:D
+        self.assertEqual(person.happy, False)

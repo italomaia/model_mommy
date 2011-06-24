@@ -28,9 +28,9 @@ class TestFillingOneToOneField(TestCase):
             _meta.get_field('one_to_one_field')
 
         self.assertTrue(isinstance(one_to_one_field, OneToOneField))
-        self.assertTrue(
-            isinstance(
-                dummy_one_to_one_model.one_to_one_field, DummyRelationModel))
+        self.assertTrue(isinstance(
+                dummy_one_to_one_model.one_to_one_field,
+                DummyRelationModel))
 
 
 class TestFillingM2MField(TestCase):
@@ -47,13 +47,12 @@ class TestFillingM2MField(TestCase):
         self.assertEqual(DummyRelationModel.objects.count(), 5)
         self.assertEqual(dummy_m2m_model.m2m_field.count(), 5)
 
-    def test_prepare_model_with_M2MField_does_not_hit_database(self):
-        from model_mommy.models import DummyM2MModel
+
+class TestGenericRelation(TestCase):
+
+    def test_create_model_with_generic_relation(self):
+        from model_mommy.models import DummyGenericRelationModel
         from model_mommy.models import DummyRelationModel
         from model_mommy import mommy
 
-        dummy_m2m_model = mommy.prepare_one(DummyM2MModel)
 
-        # relation is not created if parent model is not persisted
-        self.assertEqual(DummyRelationModel.objects.count(), 0)
-        self.assertRaises(ValueError, lambda: dummy_m2m_model.m2m_field)
