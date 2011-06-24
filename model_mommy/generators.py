@@ -15,8 +15,11 @@ import re
 import sys
 import string
 import datetime
+
 from decimal import Decimal
 from random import randint, choice, random
+
+from . import utils
 
 MIN_INT, MAX_INT = -2147483648, 2147483647
 MIN_BIG_INT, MAX_BIG_INT = -9223372036854775808l, 9223372036854775807l
@@ -36,92 +39,10 @@ DOMAIN_EXT_LIST = (
     '.tw', '.com.tw', '.idv.tw', '.co.uk', '.me.uk', '.org.uk'
 )
 
+
 class Mapper(object):
-
-    @staticmethod
-    def raw_string(length, table):
-        '''
-        Creates a random string with length equal to `length` using
-        only characters from `table`
-
-        >>> import string
-        >>> output = raw_string(20, string.letters)
-        >>> assert len(output) == 20
-        >>> assert all(map(lambda c: c in string.letters, output))
-
-        '''
-        return u''.join([choice(table) for i in range(length)])
-
-    @staticmethod
-    def raw_filename(length, ext_list):
-        '''
-        Creates a random filename with length up to `max_length`
-        and one of the given extensions. Make sure the biggest extension
-        length is smaller than `length`.
-
-        Keyword arguments:
-        -- length - len(name) + len(ext) == length
-        -- ext_list - list of valid extensions.
-
-        >>> from os import path
-        >>> ext_list = ('.doc', '.pdf')
-        >>> filename = raw_filename(20, ext_list)
-        >>> name, ext = path.splitext(filename)
-        >>> assert ext in ext_list
-
-        '''
-        char_table = re.sub(r'[/\?%*:|"<>]', '', string.printable)
-        ext = '.%s' % choice(ext_list)
-        name = self.raw_string(max_length - len(ext), char_table)
-        return name + ext
-
-    @staticmethod
-    def raw_hostname(length):
-        '''
-        Creates a hostname with length equal to informed length.
-
-        '''
-        assert length > 0, 'length is too small'
-        assert length < 64, 'length is too big'
-
-        char_table = string.ascii_letters + string.digits
-        char_table_ = string.ascii_letters + string.digits + '-'
-        hostname = ''
-
-        while len(hostname) < length:
-            # hostname can't start nor end in dot
-            if len(hostname) == 0 or len(hostname) == length - 1:
-                hostname += choice(char_table)
-            else:
-                hostname += choice(char_table_)
-
-        return hostname
-
-    @staticmethod
-    def raw_domain(length, domain_ext_list=None):
-        '''
-        Creates a random valid domain name with one of the extensions
-        informed in domain_ext_list. If not informed, an extension from
-        DOMAIN_EXT_LIST is used. Values of ext_list should begin with
-        a dot.
-        Resulted domain length is between length and length - 1.
-
-        '''
-        assert length < 256, 'length is too big'
-
-        ext_list = domain_ext_list or DOMAIN_EXT_LIST
-        ext = choice(ext_list)
-        length -= len(ext)
-
-        hostnames = []
-        while length > 1:
-            newhost_length = randint(1, min(63, length))
-
-            # -1 for the dot separating hostnames
-            length = length - newhost_length - 1
-            hostnames.append(self.raw_hostname(newhost_length))
-
-        return '.'.join(hostnames) + ext
+    ''''''
+    fields = property(get_fields)
 
     def __init__(self, fill_nullable=False, use_default=False):
         '''
@@ -211,7 +132,7 @@ class Mapper(object):
         max_digits, decimal_places =\
             field.max_digits, field.decimal_places
 
-        num_as_str = lambda max_length: self.raw_string(
+        num_as_str = lambda max_length: utils.raw_string(
             ranint(1, max_length), string.digits)
 
         return Decimal('%s.%s' % (
@@ -219,7 +140,32 @@ class Mapper(object):
             num_as_str(decimal_places)))
 
     def value_for_commaseparatedintegerfield(self, field):
-        raise Exception('Not implemented')
+        '''
+        Returns a string of comma separated integers.
+
+        '''
+        char_table = ',0123456789'
+        length = randint(1, field.max_length or 20)
+
+        num = randint(MIN_INT, MAX_INT)
+        str_num = str(num)
+
+        while len(str_num) > length:
+            num = num >> 1
+            str_num = str(num)
+
+        comma_int = str_num  # first number in the list
+        while len(comma_int) < length - 1:
+            num = randint(MIN_INT, MAX_INT)
+            str_num = str(num)
+
+            while len(comma_int) + ',' + len(str_num) > length:
+                num = num >> 1
+                str_num = str(num)
+
+            comma_int += ',' + len(str_num)
+
+        return comma_int
 
     def value_for_floatfield(self, field):
         '''
@@ -252,15 +198,14 @@ class Mapper(object):
 
         '''
         char_table = string.letters + string.digits + '-_'
-        return self.raw_string(
-            randint(1, field.max_length), char_table)
+        return utils.raw_string(randint(1, field.max_length), char_table)
 
     def value_for_charfield(self, field):
         '''
         Creates a random size string with length up to field.max_length.
 
         '''
-        return self.raw_string(
+        return utils.raw_string(
             randint(1, field.max_length), string.printable)
 
     def value_for_textfield(self, field):
@@ -268,7 +213,7 @@ class Mapper(object):
         Creates a random size string with length up to MAX_LENGTH.
 
         '''
-        return self.raw_string(
+        return utils.raw_string(
             randint(1, MAX_LENGTH), string.printable)
 
     def value_for_xmlfield(self, field):
@@ -283,7 +228,7 @@ class Mapper(object):
         assert field.max_length > 16, 'max_length is too small'
 
         length = randint(9, field.max_length - 7)
-        return 'http://%s' % self.raw_domain(length)
+        return 'http://%s' % Mapper.raw_domain(length)
 
     def value_for_emailfield(self, field):
         '''
@@ -302,17 +247,17 @@ class Mapper(object):
             char_table_cc = string.letters + string.digits + "!#$%&'*+-/=?^_`{|}~"
             char_table_nc = string.letters + string.digits + "!#$%&'*+-/=?^_`{|}~."
 
-            data = self.raw_string(1, char_table_cc)
+            data = utils.raw_string(1, char_table_cc)
             while len(data) < length:
                 if data[-1] == '.' or len(data) + 1 == length:
-                    data += self.raw_string(1, char_table_cc)
+                    data += utils.raw_string(1, char_table_cc)
                 else:
-                    data += self.raw_string(1, char_table_nc)
+                    data += utils.raw_string(1, char_table_nc)
             return data
 
         return '%s@%s' % (
             gen_local_part(local_length),
-            self.raw_domain(domain_length))
+            utils.raw_domain(domain_length))
 
     def value_for_imagefield(self, field):
         '''
@@ -320,7 +265,7 @@ class Mapper(object):
 
         '''
         ext_list = ('.jpg', '.png', '.gif')
-        return self.raw_filename(field.max_length, ext_list)
+        return utils.raw_filename(field.max_length, ext_list)
 
     def value_for_filefield(self, field):
         '''
@@ -328,7 +273,7 @@ class Mapper(object):
 
         '''
         ext_list = ('.txt', '.odt', '.pdf')
-        return self.raw_filename(field.max_length, ext_list)
+        return utils.raw_filename(field.max_length, ext_list)
 
     def value_for_filepathfield(self, field):
         raise Exception('Not implemented')
