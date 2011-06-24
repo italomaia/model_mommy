@@ -12,7 +12,7 @@ if django.VERSION < (1, 2):
 from django.test import TestCase
 
 
-class TestDjangoVersinoIssues(TestCase):
+class TestDjangoVersionIssues(TestCase):
     def test_if_bigintegerfield_works_for_v1_1(self):
         from model_mommy.models import BigIntegerField
 
@@ -46,9 +46,15 @@ class FieldFillingWithParameterTestCase(TestCase):
         from model_mommy.mommy import Mommy
         from model_mommy.models import Person
 
-        person_mom = Mommy(Person)
-        person = person_mom.make_one(happy=False,
-            age=20, gender='M', name='John')
+        person_mom = Mommy()
+
+        person = person_mom.make(Person, {
+            'happy': False,
+            'age': 20,
+            'gender': 'M',
+            'name': 'John'
+        })
+
         self.assertEqual(person.age, 20)
         self.assertEqual(person.happy, False)
         self.assertEqual(person.name, 'John')
@@ -69,16 +75,6 @@ class TestMommyAPI(TestCase):
 
         # makes sure it is the person we created
         self.assertEqual(Person.objects.all()[0].id, person.id)
-
-    def test_prepare_one_should_not_persist_one_object(self):
-        from model_mommy import mommy
-        from model_mommy.models import Person
-
-        person = mommy.prepare_one(Person)
-        self.assertTrue(isinstance(person, Person))
-
-        # makes sure database is clean
-        self.assertEqual(Person.objects.all().count(), 0)
 
     def test_make_many_people(self):
         from model_mommy import mommy
@@ -106,16 +102,6 @@ class TestMommyAPI(TestCase):
         for person in Person.objects.all():
             self.assertTrue(person.name, 'Mike')
 
-    def test_prepare_many_people(self):
-        from model_mommy import mommy
-        from model_mommy.models import Person
-
-        people = mommy.prepare_many(Person)
-
-        # prepare_many creates 5 instances by default
-        self.assertEqual(len(people), 5)
-        self.assertEqual(Person.objects.count(), 0)
-
 
 class TestMommyModelsWithRelations(TestCase):
 
@@ -133,25 +119,13 @@ class TestMommyModelsWithRelations(TestCase):
         dog = mommy.make_one(Dog)
         self.assertTrue(isinstance(dog.owner, Person))
 
-    def test_prepare_one_should_not_create_one_object(self):
-        from model_mommy import mommy
-        from model_mommy.models import Person, Dog
-
-        dog = mommy.prepare_one(Dog)
-        self.assertTrue(isinstance(dog, Dog))
-        self.assertTrue(isinstance(dog.owner, Person))
-
-        # makes sure database is clean
-        self.assertEqual(Person.objects.all().count(), 0)
-        self.assertEqual(Dog.objects.all().count(), 0)
-
     def test_create_many_to_many(self):
         from model_mommy import mommy
         from model_mommy.models import Store
 
         store = mommy.make_one(Store)
+        self.assertEqual(store.customers.count(), 0)
         self.assertEqual(store.employees.count(), 5)
-        self.assertEqual(store.customers.count(), 5)
 
     def test_provide_initial_to_many_to_many(self):
         from model_mommy.models import Person, Store
@@ -180,24 +154,24 @@ class FillNullablesTestCase(TestCase):
         from model_mommy.models import Person
 
         bio_data = 'some bio'
-        mom = Mommy(Person, False)
-        p = mom.make_one(bio=bio_data)
+        mom = Mommy(False)
+        p = mom.make(Person, {'bio': bio_data})
         self.assertEqual(p.bio, bio_data)
 
     def test_if_nullables_are_filled_when_fill_nullables_is_true(self):
         from model_mommy.mommy import Mommy
         from model_mommy.models import Person
 
-        mom = Mommy(Person, True)
-        p = mom.make_one()
+        mom = Mommy(True)
+        p = mom.make(Person)
         self.assertTrue(isinstance(p.bio, basestring))
 
     def test_if_nullables_are_not_filled_when_fill_nullables_is_false(self):
         from model_mommy.mommy import Mommy
         from model_mommy.models import Person
 
-        mom = Mommy(Person, False)
-        p = mom.make_one()
+        mom = Mommy(False)
+        p = mom.make(Person)
         self.assertTrue(p.bio == None)
 
 
