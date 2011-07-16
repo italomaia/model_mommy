@@ -42,3 +42,9 @@ class SimpleExtendMommy(TestCase):
 
         # making sure this person is sad >:D
         self.assertEqual(person.happy, False)
+
+    def test_overwriting_foreignkey_behavior(self):
+        from model_mommy.mommy import Mommy
+        from model_mommy.models import Person
+
+
