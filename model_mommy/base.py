@@ -4,16 +4,25 @@ from django.db.models.fields import *
 from django.db.models.fields.related import *
 from django.db.models.fields.files import *
 
+import string
+import datetime
 from random import randint, choice, random
 
+UNICODE_RANGE = (0, 1114111)  # ref: http://docs.python.org/howto/unicode.html
 
+LATIN1_TABLE = u''.join([unichr(i) for i in range(256)])
+ASCII_TABLE = LATIN1_TABLE[:128]
+SLUG_TABLE = string.ascii_lowercase + string.digits + "-_"
+
+LEAVE_TO_CHANCE = (True, False, False)
+TEXT_MAX_LENGTH = 500
 MIN_INT, MAX_INT = -2147483648, 2147483647
 MIN_BIG_INT, MAX_BIG_INT = -9223372036854775808l, 9223372036854775807l
 MIN_SMALL_INT, MAX_SMALL_INT = -32768, 32767
 
 
-def generate_string(length, char_table):
-    return ''.join([choice(char_table) for i in range(size)])
+def raw_string(length, char_table):
+    return u''.join([choice(char_table) for i in range(length)])
 
 
 class Base(object):
@@ -31,10 +40,15 @@ class Base(object):
         for field in self.get_fields():
             if isinstance(field, AutoField):  # auto populated
                 continue
+            # field value was provided. Ignoring...
             elif field.name in attrs:
                 continue
-            elif field.null:
+            elif type(field) in (OneToOneField, ForeignKey, ManyToManyField) and field.null:
                 continue
+            elif field.null and choice(LEAVE_TO_CHANCE):
+                continue
+            elif field.blank and choice(LEAVE_TO_CHANCE):
+                attrs[field.name] = ''
             else:
                 attrs[field.name] = self.get_value_for_field(field)
 
@@ -58,7 +72,7 @@ class Base(object):
         return choice((False, True))
 
     def value_for_nullbooleanfield(self, field):
-        pass
+        return choice((None, False, True))
 
     def value_for_smallintegerfield(self, field):
         return randint(MIN_SMALL_INT, MAX_SMALL_INT)
@@ -80,27 +94,42 @@ class Base(object):
 
     def value_for_decimalfield(self, field):
         md, dp = field.max_digits, field.decimal_places
+        dp_length = randint(0, dp)
+        md_length = md - dp_length
+        md_number = ''.join([randint(0, 9) for i in range(md_length)])
+        dp_number = ''.join([randint(0, 9) for i in range(dp_length)])
+        return "%s.%s" % (md_number, dp_number)
 
     def value_for_commaseparatedintegerfield(self, field):
-        pass
+        max_length = field.max_length
+        str_int_list = ""
+
+        while len(str_int_list) < max_length:
+            str_int_list += not choice(LEAVE_TO_CHANCE) and str(randint(0, 9)) or ","
+        return str_int_list
 
     def value_for_datefield(self, field):
-        pass
+        return datetime.today()
 
     def value_for_timefield(self, field):
-        pass
+        return datetime.now()
 
     def value_for_datetimefield(self, field):
-        pass
+        return datetime.datetime()
 
     def value_for_charfield(self, field):
-        max_length, blank = field.max_length, field.blank
+        max_length = field.max_length
+        length = randint(1, max_length)
+        return raw_string(length, LATIN1_TABLE)
 
     def value_for_slugfield(self, field):
-        pass
+        max_length = field.max_length
+        length = randint(1, max_length)
+        return raw_string(length, SLUG_TABLE)
 
     def value_for_textfield(self, field):
-        pass
+        length = randint(1, TEXT_MAX_LENGTH)
+        return raw_string(length, LATIN1_TABLE + "\n")
 
     def value_for_xmlfield(self, field):
         pass
