@@ -4,11 +4,14 @@ from django.db.models.fields import *
 from django.db.models.fields.related import *
 from django.db.models.fields.files import *
 
-import string
-import datetime
-from random import randint, choice, random
+from .utils import *
 
-UNICODE_RANGE = (0, 1114111)  # ref: http://docs.python.org/howto/unicode.html
+import datetime
+
+# ref: http://docs.python.org/howto/unicode.html
+UNICODE_RANGE = (0, 1114111)
+LATIN1_RANGE = (0, 255)
+ASCII_RANGE = (0, 127)
 
 LATIN1_TABLE = u''.join([unichr(i) for i in range(256)])
 ASCII_TABLE = LATIN1_TABLE[:128]
@@ -19,10 +22,6 @@ TEXT_MAX_LENGTH = 500
 MIN_INT, MAX_INT = -2147483648, 2147483647
 MIN_BIG_INT, MAX_BIG_INT = -9223372036854775808l, 9223372036854775807l
 MIN_SMALL_INT, MAX_SMALL_INT = -32768, 32767
-
-
-def raw_string(length, char_table):
-    return u''.join([choice(char_table) for i in range(length)])
 
 
 class Base(object):
@@ -109,13 +108,55 @@ class Base(object):
         return str_int_list
 
     def value_for_datefield(self, field):
+        """
+        Returns a datetime.date object for the current time
+
+        """
         return datetime.today()
 
     def value_for_timefield(self, field):
+        """
+        Returns a datetime.datetime object for the current time
+
+        """
         return datetime.now()
 
     def value_for_datetimefield(self, field):
-        return datetime.datetime()
+        """
+        Returns a datetime.datetime object for the current time
+
+        """
+        return datetime.now()
+
+    def value_for_ipaddressfield(self, field):
+        '''
+        Generates a valid IPV4 for IPAddress
+
+        Does not produce the following ip addresses:
+        ref: http://www.comptechdoc.org/independent/networking/guide/netaddressing.html
+        - 0.0.0.0 - reserved for hosts
+        - 0.x.x.x - class A network can't be zero
+        - x.x.x.0 - host ip can't be 0
+        - 255.x.x.x or x.255.x.x or x.x.255.x or x.x.x.255 - no network address can be 255/ broadcast address
+        - 10.x.x.x - private use for IANA
+        - 192.168.x.x - private use for IANA
+        - 172.16.0.0 to 172.31.255.255 - private use for IANA
+
+        '''
+        ip_address = None
+
+        while True:
+            ip_address = (
+                randint(1, 254), randint(0, 254),
+                randint(0, 254), randint(1, 254))
+
+            if (ip_address[0] == 10) or\
+               (ip_address[0] == 192 and ip_address[1] == 168) or\
+               (ip_address >= (172, 16, 0, 0) and ip_address <= (172, 31, 255, 255)):
+                continue
+            else:
+                break
+        return '.'.join([str(token) for token in ip_address])
 
     def value_for_charfield(self, field):
         max_length = field.max_length
