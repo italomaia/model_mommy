@@ -25,6 +25,10 @@ MIN_BIG_INT, MAX_BIG_INT = -9223372036854775808l, 9223372036854775807l
 MIN_SMALL_INT, MAX_SMALL_INT = -32768, 32767
 
 
+if not hasattr(__builtins__, 'long'):
+    long = int
+
+
 class Base(object):
 
     def __init__(self, model):
@@ -51,6 +55,13 @@ class Base(object):
         """
         return self.model._meta.fields + self.model._meta.many_to_many
 
+    def get_m2m_fields(self):
+        """
+        Returns all m2m fields
+
+        """
+        return self.model._meta.many_to_many
+
     def __make(self, commit, **attrs):
         for field in self.get_fields():
             # field value was provided. Ignoring...
@@ -65,7 +76,18 @@ class Base(object):
             else:
                 attrs[field.name] = self.__get_value_for_field(field)
 
+        instance = self.model(**attrs)
+        if commit:
+            instance.save()
+        return instance
+
     def __get_value_for_field(self, field):
+        """
+        Decides which method should create the value for field.
+
+        Evaluation order: choices -> value_for_<fieldname> -> value_for_<fieldtype>
+
+        """
         field_cls = field.__class__
         field_cls_name = field_cls.__name__
 
@@ -100,30 +122,49 @@ class Base(object):
 
     def value_for_positivesmallintegerfield(self, field):
         """
-        Returns a positive 16bits integer
+        Returns a positive 16bits integer.
 
         >>> field = object()
         >>> base = Base({})
         >>> value = base.value_for_positivesmallintegerfield(field)
-        >>> assert value >= 0
+        >>> assert value >= 0, 'value is smaller than zero'
         """
         return randint(0, MAX_SMALL_INT)
 
     def value_for_integerfield(self, field):
+        """
+        Returns a 32bits integer.
+
+        >>> field = object()
+        >>> base = Base({})
+        >>> value = base.value_for_integerfield(field)
+        >>> assert isinstance(value, int), 'value is not an 32bits integer'
+
+        """
         return randint(MIN_INT, MAX_INT)
 
     def value_for_positiveintegerfield(self, field):
         """
-        Returns a positive 32bits integer
+        Returns a positive 32bits integer.
 
         >>> field = object()
         >>> base = Base({})
         >>> value = base.value_for_positiveintegerfield(field)
-        >>> assert value >= 0
+        >>> assert value >= 0, 'value is smaller than zero'
+
         """
         return randint(0, MAX_INT)
 
     def value_for_bigintegerfield(self, field):
+        """
+        Returns a 64bits integer.
+
+        >>> field = object()
+        >>> base = Base({})
+        >>> value = base.value_for_bigintegerfield(field)
+        >>> assert isinstance(value, int) or isinstance(value, long)
+
+        """
         return randint(MIN_BIG_INT, MAX_BIG_INT)
 
     def value_for_floatfield(self, field):
@@ -133,8 +174,8 @@ class Base(object):
         >>> field = object()
         >>> base = Base({})
         >>> value = base.value_for_floatfield(field)
-        >>>
         >>> assert isinstance(value, float)
+
         """
         return random() * randint(MIN_INT, MAX_INT)
 
@@ -152,6 +193,7 @@ class Base(object):
         >>> assert len(dec) + len(frac) <= field.max_digits
         >>> assert len(frac) <= field.decimal_places
         >>> assert dec.isdigit() or frac.isdigit()
+
         """
         md, dp = field.max_digits, field.decimal_places
         dp_length = randint(0, dp)
@@ -244,25 +286,27 @@ class Base(object):
 
     def value_for_charfield(self, field):
         """
-        Creates a random string with provided max_length
+        Returns a random word with provided max_length.
 
         """
-        max_length = field.max_length
-        length = randint(1, max_length)
-        return raw_string(length, UNICODE_RANGE)
+        length = randint(1, field.max_length)
+        return raw_string(length, LATIN1_TABLE)
 
     def value_for_slugfield(self, field):
         """
-        Creates a random slug field with provided max_length
+        Returns a random slug with provided max_length.
 
         """
-        max_length = field.max_length
-        length = randint(1, max_length)
+        length = randint(1, field.max_length)
         return raw_string(length, SLUG_TABLE)
 
     def value_for_textfield(self, field):
+        """
+        Returns a random text with default max_length
+
+        """
         length = randint(1, TEXT_MAX_LENGTH)
-        return raw_string(length, UNICODE_RANGE + "\n")
+        return raw_string(length, LATIN1_TABLE + '\n')
 
     def value_for_xmlfield(self, field):
         pass

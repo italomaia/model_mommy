@@ -24,7 +24,7 @@ DOMAIN_EXT_LIST = (
 
 
 def raw_string(length, table):
-    '''
+    """
     Creates a random string with length equal to `length` using
     only characters from `table`
 
@@ -33,17 +33,17 @@ def raw_string(length, table):
     >>> assert len(output) == 20
     >>> assert all(map(lambda c: c in string.letters, output))
 
-    '''
+    """
     if isinstance(table, basestring):
         return u''.join([choice(table) for i in range(length)])
     elif isinstance(table, tuple):
         return u''.join([unichr(randint(table)) for i in range(length)])
     else:
-        raise Exception("Table type unsupported.")
+        raise Exception("Unsupported table type provided.")
 
 
 def raw_filename(length, ext_list):
-    '''
+    """
     Creates a random filename with length up to `max_length`
     and one of the given extensions. Make sure the biggest extension
     length is smaller than `length`.
@@ -56,22 +56,26 @@ def raw_filename(length, ext_list):
     >>> ext_list = ('.doc', '.pdf')
     >>> filename = raw_filename(20, ext_list)
     >>> name, ext = path.splitext(filename)
+    >>>
     >>> assert ext in ext_list
+    >>> assert len(filename) <= length
 
-    '''
+    """
+    assert len(length) > max(map(lambda i: len(i), ext_list))
+
     char_table = re.sub(r'[/\?%*:|"<>]', '', string.printable)
-    ext = '.%s' % choice(ext_list)
+    ext = choice(ext_list)
     name = raw_string(length - len(ext), char_table)
     return name + ext
 
 
 def raw_hostname(length):
-    '''
+    """
     Creates a hostname with length equal to informed length.
 
-    '''
-    assert length > 0, 'length is too small'
-    assert length < 64, 'length is too big'
+    """
+    assert length > 0, 'provided length for hostname is too small. min is 1'
+    assert length < 64, 'provided length for hostname is too big. max is 63'
 
     char_table = string.ascii_letters + string.digits
     char_table_ = string.ascii_letters + string.digits + '-'
@@ -88,14 +92,14 @@ def raw_hostname(length):
 
 
 def raw_domain(length, domain_ext_list=None):
-    '''
+    """
     Creates a random valid domain name with one of the extensions
     informed in domain_ext_list. If not informed, an extension from
     DOMAIN_EXT_LIST is used. Values of ext_list should begin with
     a dot.
     Resulted domain length is between length and length - 1.
 
-    '''
+    """
     assert length < 256, 'length is too big'
 
     ext_list = domain_ext_list or DOMAIN_EXT_LIST
@@ -114,11 +118,11 @@ def raw_domain(length, domain_ext_list=None):
 
 
 def raw_tagname(size=12):
-    '''
+    """
     Creates a tagname for use with xml
 
     ps: not all valid tagnames are produced.
-    '''
+    """
     # string_ascii_lowercase used for simplicity
     return raw_string(randint(1, size), string.ascii_lowercase + "_")
 

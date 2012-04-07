@@ -163,6 +163,21 @@ Mail us!:
 
 ##Currently supports the fields:
 
-SlugField, CharField, TextField, URLField, EmailField, FileField,
-OneToOneField, ForeignKey, ManyToMany, Date and DateTimeField,
-BooleanField, and all the numeric fields.
+ * BooleanField
+ * NullBooleanField
+ * SmallIntegerField
+ * PositiveSmallIntegerField
+ * IntegerField
+ * PositiveIntegerField
+ * BigIntegerField
+ * FloatField
+ * DecimalField
+ * CommaSeparatedIntegerField
+ * DateField
+ * TimeField
+ * DateTimeField
+ * IPAddressField
+ * CharField
+ * SlugField
+ * TextField
+
