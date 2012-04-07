@@ -180,4 +180,5 @@ Mail us!:
  * CharField
  * SlugField
  * TextField
-
+ * URLField
+ * EmailField

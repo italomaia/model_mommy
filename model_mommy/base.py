@@ -309,22 +309,38 @@ class Base(object):
         return raw_string(length, LATIN1_TABLE + '\n')
 
     def value_for_xmlfield(self, field):
-        pass
+        raise Exception("XMLField generator should be implemented manually.")
 
     def value_for_filefield(self, field):
-        pass
+        return raw_filename(field.max_length, FILE_EXT_LIST)
 
     def value_for_filepathfield(self, field):
         pass
 
     def value_for_imagefield(self, field):
-        pass
+        return raw_filename(field.max_length, IMG_EXT_LIST)
 
     def value_for_urlfield(self, field):
-        pass
+        domain = raw_domain(field.max_length)
+        return "http://%s"
 
     def value_for_emailfield(self, field):
-        pass
+        """
+        ref: http://en.wikipedia.org/wiki/Email_address
+
+
+        """
+        max_length = field.max_length
+
+        assert max_length >= 3, 'max_length for emailfield is too short'
+
+        max_length -= 1  # @
+        local_part_length = randint(1, max_length)
+        domain_part_length = randint(1, local_part_length)
+
+        local_part = raw_email_localpart(local_part_length)
+        domain_part = raw_hostname(domain_part_length)
+        return u"%s@%s" % (local_part, domain_part)
 
     def value_for_foreignkey(self, field):
         pass

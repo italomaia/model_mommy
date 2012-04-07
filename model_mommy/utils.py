@@ -1,26 +1,18 @@
 # -*- coding:utf-8 -*-
 
 __doc__ = '''
-Some useful functions if you plan on overwriting any
-mommy methods.
+Some useful functions if you plan on overwriting mommy methods.
 '''.strip()
 
 import re
 import string
 
 from random import randint, choice
-from xml.dom.minidom import parseString
 
-DOMAIN_EXT_LIST = (
-    '.com', '.co', '.info', '.net', '.org', '.me', '.mobi', '.us',
-    '.biz', '.mx', '.ca', '.ws', '.ag', '.com.co', '.net.co', '.nom.co',
-    '.com.ag', '.net.ag', '.it', '.fr', '.org.ag', '.am', '.asia',
-    '.at', '.be', '.bz', '.se', '.com.bz', '.net.bz', '.net.br', '.vg',
-    '.com.br', '.cc', '.de', '.es', '.com.es', '.nom.es', '.org.es',
-    '.eu', '.fm', '.gs', '.in', '.co.in', '.firm.in', '.gen.in', '.tv',
-    '.ind.in', '.net.in', '.org.in', '.jobs', '.jp', '.ms', '.com.mx',
-    '.nl', '.nu', '.co.nz', '.net.nz', '.org.nz', '.tc', '.tk',
-    '.tw', '.com.tw', '.idv.tw', '.co.uk', '.me.uk', '.org.uk')
+DOC_EXT_LIST = ('.doc', '.xsl', '.ppt', '.odt', '.odp', '.xml',
+                '.txt', '.zip', '.tar', '.tar.gz')
+
+IMG_EXT_LIST = ('.jpg', '.png', '.gif', '.bmp')
 
 
 def raw_string(length, table):
@@ -42,8 +34,10 @@ def raw_string(length, table):
         raise Exception("Unsupported table type provided.")
 
 
-def raw_filename(length, ext_list):
+def raw_filename(length, ext_list=None):
     """
+    ref: http://en.wikipedia.org/wiki/Filename
+
     Creates a random filename with length up to `max_length`
     and one of the given extensions. Make sure the biggest extension
     length is smaller than `length`.
@@ -58,21 +52,39 @@ def raw_filename(length, ext_list):
     >>> name, ext = path.splitext(filename)
     >>>
     >>> assert ext in ext_list
-    >>> assert len(filename) <= length
+    >>> assert len(filename) == length
 
     """
-    assert len(length) > max(map(lambda i: len(i), ext_list))
-
     char_table = re.sub(r'[/\?%*:|"<>]', '', string.printable)
     ext = choice(ext_list)
     name = raw_string(length - len(ext), char_table)
     return name + ext
 
 
-def raw_hostname(length):
+def raw_email_localpart(length):
+    """
+    ref: http://en.wikipedia.org/wiki/Email_address
+    """
+    char_table = string.ascii_letters + string.digits + "!#$%&'*+-/=?^_`{|}~"
+    char_table_ = char_table + "."
+
+    email = ""
+    while len(email) < length:
+        if len(email) in (0, length - 1) or email[-1] == '.':
+            email += choice(char_table)
+        else:
+            email += choice(char_table_)
+    return email
+
+
+def raw_hostname_label(length):
     """
     Creates a hostname with length equal to informed length.
 
+    >>> length = 10
+    >>> value = raw_hostname_label(length)
+    >>>
+    >>> assert len(value) == length
     """
     assert length > 0, 'provided length for hostname is too small. min is 1'
     assert length < 64, 'provided length for hostname is too big. max is 63'
@@ -91,70 +103,46 @@ def raw_hostname(length):
     return hostname
 
 
-def raw_domain(length, domain_ext_list=None):
+def raw_hostname(length, ext_list=None):
     """
-    Creates a random valid domain name with one of the extensions
-    informed in domain_ext_list. If not informed, an extension from
-    DOMAIN_EXT_LIST is used. Values of ext_list should begin with
-    a dot.
-    Resulted domain length is between length and length - 1.
+    ref: http://en.wikipedia.org/wiki/Hostname
+    ref: http://en.wikipedia.org/wiki/Domain_Name
+
+    Creates a random valid hostname.
+    (a domain name is a hostname with an associated ip address)
+
+    Params:
+    - ext_list - if provided, domain ext will belong to this list.
+
+    >>> length = 20
+    >>> ext_list = ('.org', '.org.br')
+    >>> value = raw_hostname(length)
+    >>> assert isinstance(value, basestring), 'method returned something other than a basestring'
+    >>> value = raw_hostname(length, ext_list)
+    >>> split = value.split('.')
+    >>> assert len(split) > 1, 'no extension found'
+    >>> assert split[-1] == 'org' or split[-1] == 'br', 'found extension is other than provided'
 
     """
+    assert length > 1, 'length is too short'
     assert length < 256, 'length is too big'
 
-    ext_list = domain_ext_list or DOMAIN_EXT_LIST
-    ext = choice(ext_list)
-    length -= len(ext)
+    if ext_list is not None:
+        assert max(map(lambda i: len(i), ext_list)) < length, \
+        'length must be bigger than any provided extension'
 
-    hostnames = []
-    while length > 1:
-        newhost_length = randint(1, min(63, length))
+    labels = []
 
-        # -1 for the dot separating hostnames
-        length = length - newhost_length - 1
-        hostnames.append(raw_hostname(newhost_length))
+    if ext_list:
+        ext = choice(ext_list)
+        labels.append(ext.startswith(".") and ext[1:] or ext)
 
-    return '.'.join(hostnames) + ext
+    sum_labels = sum(map(lambda i: len(i), labels))
+    while (sum_labels + len(labels)) < length:
+        label_length = randint(1, min(63, sum_labels))
 
+        label = raw_hostname_label(label_length)
+        labels.append(label)
+        sum_labels = sum(map(lambda i: len(i), labels))
 
-def raw_tagname(size=12):
-    """
-    Creates a tagname for use with xml
-
-    ps: not all valid tagnames are produced.
-    """
-    # string_ascii_lowercase used for simplicity
-    return raw_string(randint(1, size), string.ascii_lowercase + "_")
-
-
-def raw_xml():
-    '''
-    Creates a random xml string. Final result can be pretty big.
-
-    '''
-
-    def add_children(doc, element, level=0):
-        new_element = doc.createElement(raw_tagname())
-
-        if choice((True, True, False)):
-            text_node = doc.createTextNode(
-                raw_string(randint(1, 100), string.printable))
-
-            new_element.childNodes.append(text_node)
-
-        element.childNodes.append(new_element)
-
-        if choice((True, False)):
-            add_children(doc, element, level)
-
-        if level < 5 and choice((True, False)):
-            add_children(doc, new_element, level + 1)
-
-    # doc with random name
-    doc = parseString(u'<%s />' % raw_tagname())
-    root = doc.childNodes[0]
-
-    while choice((True, True, False)):
-        add_children(doc, root)
-
-    return doc.toxml()
+    return '.'.join(labels)
