@@ -1,38 +1,32 @@
 # -*- coding:utf-8 -*-
+import logging
+from django.db.models.fields import NOT_PROVIDED
 
-from django.db.models.fields import *
 from django.db.models.fields.related import *
-from django.db.models.fields.files import *
+from django.contrib.contenttypes.generic import GenericRelation
 
 from .utils import *
+from .constants import *
 
 import datetime
 from random import random
 
-# ref: http://docs.python.org/howto/unicode.html
-UNICODE_RANGE = (0, 1114111)
-LATIN1_RANGE = (0, 255)
-ASCII_RANGE = (0, 127)
-
-LATIN1_TABLE = u''.join([unichr(i) for i in range(256)])
-ASCII_TABLE = LATIN1_TABLE[:128]
-SLUG_TABLE = string.ascii_lowercase + string.digits + "-_"
-
-LEAVE_TO_CHANCE = (True, False, False)
-TEXT_MAX_LENGTH = 500
-MIN_INT, MAX_INT = -2147483648, 2147483647
-MIN_BIG_INT, MAX_BIG_INT = -9223372036854775808l, 9223372036854775807l
-MIN_SMALL_INT, MAX_SMALL_INT = -32768, 32767
-
 
 if not hasattr(__builtins__, 'long'):
-    long = int
+    long = int  # python < 3.0
 
 
 class Base(object):
 
-    def __init__(self, model):
+    def __init__(self, model, fill_null=None):
+        """
+        Keyword arguments:
+        model -- base model instance
+        fill_null -- force null or non null value for nullable fields. If None, leave up to chance.
+
+        """
         self.model = model
+        self.fill_null = fill_null
 
     def make(self, **attrs):
         """
@@ -50,74 +44,142 @@ class Base(object):
 
     def get_fields(self):
         """
-        Returns all available fields (regular fields plus m2m fields)
+        Returns all available fields, but m2m fields.
 
         """
-        return self.model._meta.fields + self.model._meta.many_to_many
+        return self.model._meta.fields
 
     def get_m2m_fields(self):
         """
-        Returns all m2m fields
+        Returns all m2m fields.
 
         """
         return self.model._meta.many_to_many
 
+    def get_all_fields(self):
+        """
+        Returns all available fields.
+
+        """
+        return self.get_fields() + self.get_m2m_fields()
+
     def __make(self, commit, **attrs):
-        for field in self.get_fields():
+        """
+        If attribute value is provided in attrs, it is not overwritten.
+        AutoField and GenericRelation fields are ignored.
+        Nullable OneToOne, ForeignKey and ManyToMany fields are ignored.
+
+        Keyword arguments:
+        commit (bool) -- Should instance be commited?
+        attrs (dict) -- pre-defined instance values
+
+        """
+        for field in self.get_all_fields():
             # field value was provided. Ignoring...
             if field.name in attrs:
                 continue
-            elif type(field) in (OneToOneField, ForeignKey, ManyToManyField) and field.null:
+
+            elif type(field) in (AutoField, GenericRelation):
                 continue
-            elif field.null and choice(LEAVE_TO_CHANCE):
+
+            elif field.null and (self.fill_null is False):
                 continue
+
+            elif field.null and (self.fill_null is None) and choice(LEAVE_TO_CHANCE):
+                continue
+
             elif field.blank and choice(LEAVE_TO_CHANCE):
-                attrs[field.name] = ''
+                if field.default == NOT_PROVIDED:
+                    attrs[field.name] = ''
+                else:
+                    attrs[field.name] = field.default
+
             else:
-                attrs[field.name] = self.__get_value_for_field(field)
+                value = self.__get_value_for_field(field)
+
+                if value is not None:
+                    attrs[field.name] = value
+
+        m2m_attrs = {}
+
+        for field in self.get_m2m_fields():
+            if field.name in attrs:
+                m2m_attrs[field.name] = attrs.pop(field.name)
 
         instance = self.model(**attrs)
+
         if commit:
             instance.save()
+
+            # m2m instance are only persisted if commit is True
+            for key, m2m_values in m2m_attrs.items():
+                m2m_relation = getattr(instance, key)
+
+                for value in m2m_values:
+                    m2m_relation.add(value)
+
         return instance
 
     def __get_value_for_field(self, field):
         """
         Decides which method should create the value for field.
 
-        Evaluation order: choices -> value_for_<fieldname> -> value_for_<fieldtype>
+        Evaluation order:
+            choices -> value_for_<fieldname>field -> value_for_<fieldtype>
 
         """
         field_cls = field.__class__
-        field_cls_name = field_cls.__name__
+        field_cls_name = field_cls.__name__.lower()
 
-        # get from avaiable choices
-        if hasattr(field, 'choices'):
+        field_name_method = 'value_for_' + field.name + "field"
+        field_type_method = 'value_for_' + field_cls_name
+
+        if field.choices:  # get from avaiable choices
             return choice(map(lambda c: c[0], field.choices))
-        # generate from class method
-        elif hasattr(self, 'value_for_' + field_cls_name):
-            return getattr(self, 'value_for_' + field_cls_name)(field)
+
+        elif hasattr(self, field_name_method):
+            return getattr(self, field_name_method)(field)
+
+        elif hasattr(self, field_type_method):
+            return getattr(self, field_type_method)(field)
+
         else:  # unsupported field type
             raise TypeError('%s is not supported by mommy.' % field_cls_name)
 
-    def value_for_autofield(self, field):
-        return None
-
     def value_for_booleanfield(self, field):
         """
-        Returns True or False
+        Returns True or False.
+
+        >>> field = object()
+        >>> base = Base({})
+        >>> value = base.value_for_booleanfield(field)
+        >>> assert value in (True, False), 'returned value is invalid'
 
         """
         return choice((False, True))
 
     def value_for_nullbooleanfield(self, field):
         """
-        Returns None, True or False
+        Returns None, True or False.
+
+        >>> field = object()
+        >>> base = Base({})
+        >>> value = base.value_for_nullbooleanfield(field)
+        >>> assert value in (None, True, False), 'returned value is invalid'
 
         """
         return choice((None, False, True))
 
     def value_for_smallintegerfield(self, field):
+        """
+        Returns a 16bits integer.
+
+        >>> field = object()
+        >>> base = Base({})
+        >>> value = base.value_for_smallintegerfield(field)
+        >>> assert isinstance(value, int), 'value is not integer'
+
+        """
         return randint(MIN_SMALL_INT, MAX_SMALL_INT)
 
     def value_for_positivesmallintegerfield(self, field):
@@ -128,6 +190,7 @@ class Base(object):
         >>> base = Base({})
         >>> value = base.value_for_positivesmallintegerfield(field)
         >>> assert value >= 0, 'value is smaller than zero'
+
         """
         return randint(0, MAX_SMALL_INT)
 
@@ -238,24 +301,24 @@ class Base(object):
         Returns a datetime.date object for the current time
 
         """
-        return datetime.today()
+        return datetime.date.today()
 
     def value_for_timefield(self, field):
         """
         Returns a datetime.datetime object for the current time
 
         """
-        return datetime.now()
+        return datetime.datetime.now()
 
     def value_for_datetimefield(self, field):
         """
         Returns a datetime.datetime object for the current time
 
         """
-        return datetime.now()
+        return datetime.datetime.now()
 
     def value_for_ipaddressfield(self, field):
-        '''
+        """
         Generates a valid IPV4 for IPAddress
 
         Does not produce the following ip addresses:
@@ -268,7 +331,7 @@ class Base(object):
         - 192.168.x.x - private use for IANA
         - 172.16.0.0 to 172.31.255.255 - private use for IANA
 
-        '''
+        """
         ip_address = None
 
         while True:
@@ -309,25 +372,44 @@ class Base(object):
         return raw_string(length, LATIN1_TABLE + '\n')
 
     def value_for_xmlfield(self, field):
+        """
+        Depricated since django 1.3
+        """
         raise Exception("XMLField generator should be implemented manually.")
 
     def value_for_filefield(self, field):
+        """
+        Returns a random file path
+
+        """
         return raw_filename(field.max_length, FILE_EXT_LIST)
 
     def value_for_filepathfield(self, field):
-        pass
+        """
+        Returns a random file path
+
+        """
+        return raw_filename(field.max_length, FILE_EXT_LIST)
 
     def value_for_imagefield(self, field):
+        """
+        Returns a random image file path
+
+        """
         return raw_filename(field.max_length, IMG_EXT_LIST)
 
     def value_for_urlfield(self, field):
-        domain = raw_domain(field.max_length)
-        return "http://%s"
+        """
+        Returns a random url without parameters.
+
+        """
+        return "http://%s" % raw_hostname(field.max_length)
 
     def value_for_emailfield(self, field):
         """
         ref: http://en.wikipedia.org/wiki/Email_address
 
+        Returns a random email string.
 
         """
         max_length = field.max_length
@@ -343,10 +425,26 @@ class Base(object):
         return u"%s@%s" % (local_part, domain_part)
 
     def value_for_foreignkey(self, field):
-        pass
+        """
+        Returns a instance for the field.
+
+        """
+        model = field.related.parent_model
+        base = Base(model)
+        return base.make()
 
     def value_for_onetoonefield(self, field):
-        pass
+        """
+        Returns a instance for the field.
+
+        """
+        model = field.related.parent_model
+        base = Base(model)
+        return base.make()
 
     def value_for_manytomanyfield(self, field):
-        pass
+        """
+        Implement this method manually.
+
+        """
+        return []
