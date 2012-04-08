@@ -9,16 +9,36 @@ import string
 
 from random import randint, choice
 
-DOC_EXT_LIST = ('.doc', '.xsl', '.ppt', '.odt', '.odp', '.xml',
-                '.txt', '.zip', '.tar', '.tar.gz')
+AUD_EXT_LIST = (
+    '.aif', '.iff', '.mid', '.mp3', '.m4a', '.wav', '.wma'
+)
 
-IMG_EXT_LIST = ('.jpg', '.png', '.gif', '.bmp')
+DOC_EXT_LIST = (
+    '.doc', '.docx', '.ppt', '.pps', '.rtf', '.tex', '.log',
+    '.xsl', '.xml', '.odt', '.odp', '.txt'
+)
+
+IMG_EXT_LIST = (
+    '.bmp', '.gif', '.jpg', '.png', '.psd', '.tga', '.tif',
+    '.xcf'
+)
+
+VID_EXT_LIST = (
+    '.3gp', '.asf', '.avi', '.flv', '.mov', '.mp4', '.mpg',
+    '.rm', '.swf', '.vob', '.wmv', '.mkv'
+)
+
+FILE_EXT_LIST = AUD_EXT_LIST + DOC_EXT_LIST + IMG_EXT_LIST + VID_EXT_LIST
 
 
 def raw_string(length, table):
     """
     Creates a random string with length equal to `length` using
     only characters from `table`
+
+    Keyword arguments:
+    length -- length for the new string
+    table -- string with usable characters or tuple with usable char code range
 
     >>> import string
     >>> output = raw_string(20, string.letters)
@@ -43,12 +63,14 @@ def raw_filename(length, ext_list=None):
     length is smaller than `length`.
 
     Keyword arguments:
-    -- length - len(name) + len(ext) == length
-    -- ext_list - list of valid extensions.
+    length -- length for the new filename
+    ext_list -- list of valid extensions.
 
     >>> from os import path
+    >>>
+    >>> length = 20
     >>> ext_list = ('.doc', '.pdf')
-    >>> filename = raw_filename(20, ext_list)
+    >>> filename = raw_filename(length, ext_list)
     >>> name, ext = path.splitext(filename)
     >>>
     >>> assert ext in ext_list
@@ -56,7 +78,12 @@ def raw_filename(length, ext_list=None):
 
     """
     char_table = re.sub(r'[/\?%*:|"<>]', '', string.printable)
-    ext = choice(ext_list)
+
+    if ext_list is not None:
+        ext = choice(ext_list)
+    else:
+        ext = ''
+
     name = raw_string(length - len(ext), char_table)
     return name + ext
 
@@ -80,6 +107,9 @@ def raw_email_localpart(length):
 def raw_hostname_label(length):
     """
     Creates a hostname with length equal to informed length.
+
+    Keyword arguments:
+    length -- length for the new hostname label
 
     >>> length = 10
     >>> value = raw_hostname_label(length)
@@ -111,20 +141,24 @@ def raw_hostname(length, ext_list=None):
     Creates a random valid hostname.
     (a domain name is a hostname with an associated ip address)
 
-    Params:
-    - ext_list - if provided, domain ext will belong to this list.
+    Keyword arguments:
+    length -- length for the new hostname
+    ext_list -- if provided, domain ext will belong to this list.
 
     >>> length = 20
     >>> ext_list = ('.org', '.org.br')
+
     >>> value = raw_hostname(length)
     >>> assert isinstance(value, basestring), 'method returned something other than a basestring'
+
     >>> value = raw_hostname(length, ext_list)
     >>> split = value.split('.')
+
     >>> assert len(split) > 1, 'no extension found'
     >>> assert split[-1] == 'org' or split[-1] == 'br', 'found extension is other than provided'
 
     """
-    assert length > 1, 'length is too short'
+    assert length > 0, 'length is too short'
     assert length < 256, 'length is too big'
 
     if ext_list is not None:
@@ -138,11 +172,17 @@ def raw_hostname(length, ext_list=None):
         labels.append(ext.startswith(".") and ext[1:] or ext)
 
     sum_labels = sum(map(lambda i: len(i), labels))
-    while (sum_labels + len(labels)) < length:
-        label_length = randint(1, min(63, sum_labels))
+    while sum_labels + len(labels) < length:
+        max_length = min(63, length - sum_labels - len(labels))
+        label_length = randint(1, max_length)
 
         label = raw_hostname_label(label_length)
-        labels.append(label)
+        labels.insert(0, label)
         sum_labels = sum(map(lambda i: len(i), labels))
 
     return '.'.join(labels)
+
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
