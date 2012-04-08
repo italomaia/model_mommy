@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-import logging
+
 from django.db.models.fields import NOT_PROVIDED
 
 from django.db.models.fields.related import *
@@ -9,6 +9,7 @@ from .utils import *
 from .constants import *
 
 import datetime
+from decimal import Decimal
 from random import random
 
 
@@ -95,6 +96,7 @@ class Base(object):
                     attrs[field.name] = field.default
 
             else:
+                field.commit = commit
                 value = self.__get_value_for_field(field)
 
                 if value is not None:
@@ -223,10 +225,13 @@ class Base(object):
 
         """
         md, dp = field.max_digits, field.decimal_places
-        dp_length = randint(0, dp)
-        md_length = md - dp_length
-        md_number = ''.join([randint(0, 9) for i in range(md_length)])
-        dp_number = ''.join([randint(0, 9) for i in range(dp_length)])
+
+        dp_length = dp
+        md_length = md - dp
+
+        md_number = ''.join([str(randint(0, 9)) for i in range(md_length)])
+        dp_number = ''.join([str(randint(0, 9)) for i in range(dp_length)])
+
         return "%s.%s" % (md_number, dp_number)
 
     def value_for_commaseparatedintegerfield(self, field):
@@ -386,18 +391,20 @@ class Base(object):
         Returns a instance for the field.
 
         """
-        model = field.related.parent_model
-        base = Base(model)
-        return base.make()
+        if not field.null:
+            model = field.related.parent_model
+            base = Base(model)
+            return base.__make(field.commit)
 
     def value_for_onetoonefield(self, field):
         """
         Returns a instance for the field.
 
         """
-        model = field.related.parent_model
-        base = Base(model)
-        return base.make()
+        if not field.null:
+            model = field.related.parent_model
+            base = Base(model)
+            return base.__make(field.commit)
 
     def value_for_manytomanyfield(self, field):
         """
