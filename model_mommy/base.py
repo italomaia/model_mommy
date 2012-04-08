@@ -186,22 +186,12 @@ class Base(object):
         """
         Returns a positive 16bits integer.
 
-        >>> field = object()
-        >>> base = Base({})
-        >>> value = base.value_for_positivesmallintegerfield(field)
-        >>> assert value >= 0, 'value is smaller than zero'
-
         """
         return randint(0, MAX_SMALL_INT)
 
     def value_for_integerfield(self, field):
         """
         Returns a 32bits integer.
-
-        >>> field = object()
-        >>> base = Base({})
-        >>> value = base.value_for_integerfield(field)
-        >>> assert isinstance(value, int), 'value is not an 32bits integer'
 
         """
         return randint(MIN_INT, MAX_INT)
@@ -210,22 +200,12 @@ class Base(object):
         """
         Returns a positive 32bits integer.
 
-        >>> field = object()
-        >>> base = Base({})
-        >>> value = base.value_for_positiveintegerfield(field)
-        >>> assert value >= 0, 'value is smaller than zero'
-
         """
         return randint(0, MAX_INT)
 
     def value_for_bigintegerfield(self, field):
         """
         Returns a 64bits integer.
-
-        >>> field = object()
-        >>> base = Base({})
-        >>> value = base.value_for_bigintegerfield(field)
-        >>> assert isinstance(value, int) or isinstance(value, long)
 
         """
         return randint(MIN_BIG_INT, MAX_BIG_INT)
@@ -234,28 +214,12 @@ class Base(object):
         """
         Returns a random float value
 
-        >>> field = object()
-        >>> base = Base({})
-        >>> value = base.value_for_floatfield(field)
-        >>> assert isinstance(value, float)
-
         """
         return random() * randint(MIN_INT, MAX_INT)
 
     def value_for_decimalfield(self, field):
         """
         Returns a random decimal like string obeying field's max_digits and decimal_places
-
-        >>> field = object()
-        >>> field.max_digits = 10
-        >>> field.decimal_places = 2
-        >>> base = Base({})
-        >>> value = base.value_for_decimalfield(field)
-        >>> dec, frac = value.split(".")
-        >>>
-        >>> assert len(dec) + len(frac) <= field.max_digits
-        >>> assert len(frac) <= field.decimal_places
-        >>> assert dec.isdigit() or frac.isdigit()
 
         """
         md, dp = field.max_digits, field.decimal_places
@@ -270,15 +234,6 @@ class Base(object):
         Returns string in the format number[,number]*
         *number* is a 32bits integer
 
-        >>> import re
-        >>> c = re.compile('^\d+(m\d+)$')
-        >>> field = object()
-        >>> field.max_length = 10
-        >>> base = Base({})
-        >>> value = base.value_for_commaseparatedintegerfield(field)
-        >>>
-        >>> assert c.match(value) is not None
-        >>> assert len(value) <= field.max_value
         """
         max_length = field.max_length
 
@@ -287,7 +242,7 @@ class Base(object):
 
         rt = str(int(str_number[min(len(str_number), max_length):]))
 
-        while (len(rt) < max_length - 1) and choice(True, True, False):
+        while (len(rt) < max_length - 1) and not choice(LEAVE_TO_CHANCE):
             number = randint(MIN_INT, MAX_INT)
             str_number = str(number)
 
@@ -322,7 +277,6 @@ class Base(object):
         Generates a valid IPV4 for IPAddress
 
         Does not produce the following ip addresses:
-        ref: http://www.comptechdoc.org/independent/networking/guide/netaddressing.html
         - 0.0.0.0 - reserved for hosts
         - 0.x.x.x - class A network can't be zero
         - x.x.x.0 - host ip can't be 0
@@ -330,6 +284,8 @@ class Base(object):
         - 10.x.x.x - private use for IANA
         - 192.168.x.x - private use for IANA
         - 172.16.0.0 to 172.31.255.255 - private use for IANA
+
+        ref: http://www.comptechdoc.org/independent/networking/guide/netaddressing.html
 
         """
         ip_address = None
@@ -341,7 +297,7 @@ class Base(object):
 
             if (ip_address[0] == 10) or\
                (ip_address[0] == 192 and ip_address[1] == 168) or\
-               (ip_address >= (172, 16, 0, 0) and ip_address <= (172, 31, 255, 255)):
+               ((172, 16, 0, 0) <= ip_address <= (172, 31, 255, 255)):
                 continue
             else:
                 break
@@ -373,7 +329,8 @@ class Base(object):
 
     def value_for_xmlfield(self, field):
         """
-        Depricated since django 1.3
+        Deprecated since django 1.3
+
         """
         raise Exception("XMLField generator should be implemented manually.")
 
@@ -407,9 +364,9 @@ class Base(object):
 
     def value_for_emailfield(self, field):
         """
-        ref: http://en.wikipedia.org/wiki/Email_address
-
         Returns a random email string.
+
+        ref: http://en.wikipedia.org/wiki/Email_address
 
         """
         max_length = field.max_length
