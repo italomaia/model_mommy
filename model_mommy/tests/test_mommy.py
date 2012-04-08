@@ -1,8 +1,5 @@
 # -*- coding:utf-8 -*-
 
-from datetime import date, datetime
-from decimal import Decimal
-
 import django
 from django.test import TestCase
 from django.db.models.fields import *
@@ -52,40 +49,6 @@ class FieldFillingWithParameterTestCase(TestCase):
         self.assertEqual(person.happy, False)
         self.assertEqual(person.name, 'John')
         self.assertEqual(person.gender, 'M')
-
-
-class TestNonDefaultGenerators(TestCase):
-
-    def test_attr_mapping_with_from_default_generator(self):
-        from model_mommy.generators import gen_from_default
-        from model_mommy.mommy import Mommy
-        from model_mommy.models import Person
-
-        class HappyPersonMommy(Mommy):
-            attr_mapping = {'happy': gen_from_default}
-
-        happy_field = Person._meta.get_field('happy')
-        mom = HappyPersonMommy(Person)
-        person = mom.make_one()
-        self.assertTrue(person.happy == happy_field.default)
-
-    def test_attr_mapping_with_from_list_generator(self):
-        from model_mommy.mommy import Mommy
-        from model_mommy.models import Person
-        from model_mommy.generators import gen_from_list
-
-        age_list = range(4, 12)
-
-        class KidMommy(Mommy):
-            attr_mapping = {
-                'age': gen_from_list(age_list)
-            }
-
-        mom = KidMommy(Person)
-        kid = mom.make_one()
-
-        # person's age belongs to informed list?
-        self.assertTrue(kid.age in age_list)
 
 
 class TestMommyAPI(TestCase):
@@ -176,7 +139,7 @@ class TestMommyModelsWithRelations(TestCase):
         from model_mommy.models import Store
 
         store = mommy.make_one(Store)
-        self.assertEqual(store.employees.count(), 5)
+        self.assertEqual(store.employees.count(), 0)
         self.assertEqual(store.customers.count(), 0)
 
     def test_provide_initial_to_many_to_many(self):
@@ -200,9 +163,10 @@ class TestAutoRefPattern(TestCase):
         from model_mommy import mommy
         from model_mommy.models import Penguin
 
-        penguin = mommy.make_one(Penguin)
+        penguin = mommy.make_one(Penguin, fill_null=False)
+        other_penguin = Penguin.objects.all()[0]
 
-        self.assertEqual(penguin, Penguin.objects.all()[0])
+        self.assertEqual(penguin, other_penguin)
         self.assertEqual(penguin.parcel.count(), 0)
         self.assertRaises(Penguin.DoesNotExist, lambda: penguin.mate)
 
@@ -219,11 +183,12 @@ class TestAutoRefPattern(TestCase):
         from model_mommy import mommy
         from model_mommy.models import Penguin
 
-        fellows = mommy.make_many(Penguin, 10)
-        penguin = mommy.make_one(Penguin, parcel=fellows)
+        fellows = mommy.make_many(Penguin, 10, fill_null=False)
+        penguin = mommy.make_one(Penguin, fill_null=False, parcel=fellows)
 
-        self.assertEqual(penguin.parcel.count(),
-            Penguin.objects.exclude(id=penguin.id).count())
+        parcel_count = penguin.parcel.count()
+        all_but_me_count = Penguin.objects.exclude(id=penguin.id).count()
+        self.assertEqual(parcel_count, all_but_me_count)
 
 
 class FillNullablesTestCase(TestCase):
@@ -233,14 +198,15 @@ class FillNullablesTestCase(TestCase):
         from model_mommy.models import Person
 
         bio_data = 'some bio'
-        mom = Mommy(Person, False)
+        mom = Mommy(Person, None)
         p = mom.make_one(bio=bio_data)
-        self.assertEqual(p.bio, bio_data)
+        self.assertTrue(p.bio in (bio_data, None))
 
     def test_if_nullables_are_filled_when_fill_nullables_is_true(self):
         from model_mommy.mommy import Mommy
         from model_mommy.models import Person
 
+        # force value for nullable fields
         mom = Mommy(Person, True)
         p = mom.make_one()
         self.assertTrue(isinstance(p.bio, basestring))
@@ -249,9 +215,10 @@ class FillNullablesTestCase(TestCase):
         from model_mommy.mommy import Mommy
         from model_mommy.models import Person
 
+        # force None to nullable fields
         mom = Mommy(Person, False)
         p = mom.make_one()
-        self.assertTrue(p.bio == None)
+        self.assertEqual(p.bio, None)
 
 
 class FillingFromChoice(FieldFillingTestCase):
