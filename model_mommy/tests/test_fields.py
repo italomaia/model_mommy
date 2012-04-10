@@ -9,6 +9,8 @@ from django.test import TestCase
 if django.VERSION < (1, 2):
     BigIntegerField = IntegerField
 
+from decimal import Decimal
+
 
 class HandlingModelsWithUnsupportedFields(TestCase):
 
@@ -256,12 +258,10 @@ class TestFillingOthersNumericFields(TestCase):
         from model_mommy.models import DummyDecimalModel
 
         self.dummy_decimal_model = mommy.make_one(DummyDecimalModel)
-        decimal_field =\
-            DummyDecimalModel._meta.get_field('decimal_field')
+        decimal_field = DummyDecimalModel._meta.get_field('decimal_field')
 
         self.assertTrue(isinstance(decimal_field, DecimalField))
-        self.assertTrue(isinstance(
-            self.dummy_decimal_model.decimal_field, basestring))
+        self.assertTrue(isinstance(self.dummy_decimal_model.decimal_field, basestring))
 
 
 class TestFillingURLFields(TestCase):

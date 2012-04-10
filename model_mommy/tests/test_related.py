@@ -52,6 +52,10 @@ class TestFillingForeignKey(TestCase):
 class TestFillingM2MField(TestCase):
 
     def test_create_model_with_M2MField(self):
+        """
+        M2M fields should be populated manually.
+
+        """
         from model_mommy.models import DummyM2MModel
         from model_mommy.models import DummyRelationModel
         from model_mommy import mommy
@@ -60,8 +64,8 @@ class TestFillingM2MField(TestCase):
         m2m_field = DummyM2MModel._meta.get_field('m2m_field')
 
         self.assertTrue(isinstance(m2m_field, ManyToManyField))
-        self.assertEqual(DummyRelationModel.objects.count(), 5)
-        self.assertEqual(dummy_m2m_model.m2m_field.count(), 5)
+        self.assertEqual(DummyRelationModel.objects.count(), 0)
+        self.assertEqual(dummy_m2m_model.m2m_field.count(), 0)
 
     def test_prepare_model_with_M2MField_does_not_hit_database(self):
         from model_mommy.models import DummyM2MModel

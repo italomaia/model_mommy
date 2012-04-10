@@ -54,21 +54,12 @@ But, if don't need a persisted object, mommy can handle this for you as well:
 
     kid = mommy.prepare_one(Kid)
 
-It works like make_one, but like was said, it doesn't persist the instance.
+It works like make_one, but like was said, it doesn't persist the instance nor related fields.
 
 ## Note 1
 
-Models that have self-referenced fields (like ForeignKey('self') and so on) are treated
-different but mommy. To avoid problems like infinite loops, the only generated
-value for these fields is None. If you want to create a model instance in which
-these fields are populated, you should do it manually.
-
-## Note 2
-
-To avoid cycles with the model factory (model A references model B that
-references model A. Not the best design, but it happens.), _fill_nullables_
-attribute default value was changed to _False_.
-
+ForeignKey and OneToOne fields are not populated by default if null=True. This behavior
+helps avoiding problems with recursive loops and the "diamond effect".
 
 ## Not so Basic Usage
 
@@ -78,12 +69,12 @@ Model instances can also be generated from Mommy factories. Make your mass produ
     from model_mommy.models import Kid
 
     mom = Mommy(Kid)
-    first_kid = mom.make_one()
-    second_kid = mom.make_one()
-    third_kid = mom.make_one()
+    first_kid = mom.make()
+    second_kid = mom.make()
+    third_kid = mom.make()
 
-Note that this kind of construction is much more efficient than mommy.make_one(Model),
-so, if you need to create a lot of instances, this might be a nicier approach, or...
+Note that this kind of construction is more efficient than mommy.make_one(Model),
+so, if you need to create a lot of instances, this might be a nice approach, or...
 
     from model_mommy.mommy import Mommy
     from model_mommy.models import Kid
@@ -100,16 +91,15 @@ a specific field to be populated with a generator different from the default
 generator, you must extend the Mommy class to get this behavior.
 Let's see a example:
 
-    from model_mommy.generators import gen_from_list
+    from random import choice
     from model_mommy.models import Kid
     from model_mommy.mommy import Mommy
 
     a_lot_of_games = range(30, 100)
 
     class HardGamerMommy(Mommy):
-        attr_mapping = {
-            'wanted_games_qtd': gen_from_list(a_lot_of_games)
-        }
+        def value_for_wanted_games_qtdfield(self, field):
+            return choice(a_lot_of_games)
 
     mom = HardGamerMommy(Kid)
     kid = mom.make_one()
@@ -119,22 +109,16 @@ Note that you can also create your own generator.
 
 ## Your Own Generator
 
-A generator is just a simple callable (like a function) that may require a few arguments.
+A generator is just a simple method which receives a field as argument.
 Let's see a dead simple example:
 
-    gen_newborn_age = lambda: 0
-
     class BabeMommy(Mommy):
-        attr_mapping = {'age': gen_newborn_age}
+        def value_for_agefield(self, field):
+            return 0
 
     mom = BabeMommy(Kid)
     baby = mom.make_one()
     assert(baby.age == 0)
-
-If the generator requires a attribute from the field as argument, you could do something like this:
-
-    gen_name_from_default = lambda default_value: default_value
-    gen_name_from_default.required = ['default']
 
 ## For contributors
 
@@ -163,6 +147,22 @@ Mail us!:
 
 ##Currently supports the fields:
 
-SlugField, CharField, TextField, URLField, EmailField, FileField,
-OneToOneField, ForeignKey, ManyToMany, Date and DateTimeField,
-BooleanField, and all the numeric fields.
+ * BooleanField
+ * NullBooleanField
+ * SmallIntegerField
+ * PositiveSmallIntegerField
+ * IntegerField
+ * PositiveIntegerField
+ * BigIntegerField
+ * FloatField
+ * DecimalField
+ * CommaSeparatedIntegerField
+ * DateField
+ * TimeField
+ * DateTimeField
+ * IPAddressField
+ * CharField
+ * SlugField
+ * TextField
+ * URLField
+ * EmailField
