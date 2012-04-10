@@ -190,4 +190,6 @@ Mail us!:
  * SlugField
  * TextField
  * URLField
+ * FileField
+ * ImageField
  * EmailField
