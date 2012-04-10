@@ -55,6 +55,10 @@ class DummyDateTimeModel(models.Model):
     datetime_field = DateTimeField()
 
 
+class DummyTimeModel(models.Model):
+    time_field = TimeField()
+
+
 class DummySlugModel(models.Model):
     slug_field = models.SlugField()
 
@@ -73,6 +77,10 @@ class DummyURLModel(models.Model):
 
 class DummyEmailModel(models.Model):
     email_field = EmailField()
+
+
+class DummyCommaSeparatedIntegerModel(models.Model):
+    comma_separated_integer_field = CommaSeparatedIntegerField(max_length=20)
 
 
 class DummyIntModel(models.Model):
@@ -104,6 +112,10 @@ class DummyFileModel(models.Model):
 
 class DummyImageModel(models.Model):
     image_field = FileField(upload_to='images')
+
+
+class DummyIPAddressFieldModel(models.Model):
+    ip_address_field = IPAddressField()
 
 
 class DummyRelationModel(models.Model):

@@ -243,14 +243,16 @@ class Mommy(object):
         number = randint(MIN_INT, MAX_INT)
         str_number = str(number)
 
-        rt = str(int(str_number[min(len(str_number), max_length):]))
+        cut_off = len(str_number) - min(len(str_number), max_length)
+        rt = str(int(str_number[cut_off:]))
 
         while (len(rt) < max_length - 1) and not choice(LEAVE_TO_CHANCE):
             number = randint(MIN_INT, MAX_INT)
             str_number = str(number)
 
             rt += ","
-            rt += str(int(str_number[min(len(str_number), max_length - len(rt)):]))
+            cut_off = len(str_number) - min(len(str_number), max_length - len(rt))
+            rt += str(int(str_number[cut_off:]))
 
         return rt
 
@@ -342,13 +344,15 @@ class Mommy(object):
         Returns a random file path
 
         """
-        return raw_filename(field.max_length, FILE_EXT_LIST)
+        length = randint(1, field.max_length)
+        return raw_filename(length, FILE_EXT_LIST)
 
     def value_for_filepathfield(self, field):
         """
         Returns a random file path
 
         """
+        length = randint(1, field.max_length)
         return raw_filename(field.max_length, FILE_EXT_LIST)
 
     def value_for_imagefield(self, field):
@@ -356,14 +360,18 @@ class Mommy(object):
         Returns a random image file path
 
         """
-        return raw_filename(field.max_length, IMG_EXT_LIST)
+        length = randint(1, field.max_length)
+        return raw_filename(length, IMG_EXT_LIST)
 
     def value_for_urlfield(self, field):
         """
         Returns a random url without parameters.
 
         """
-        return "http://%s" % raw_hostname(field.max_length)
+        assert field.max_length > 8, 'informed max_length for url is too small'
+
+        length = randint(1, field.max_length - 7)
+        return "http://%s" % raw_hostname(length)
 
     def value_for_emailfield(self, field):
         """
@@ -377,8 +385,8 @@ class Mommy(object):
         assert max_length >= 3, 'max_length for emailfield is too short'
 
         max_length -= 1  # @
-        local_part_length = randint(1, max_length)
-        domain_part_length = randint(1, local_part_length)
+        local_part_length = randint(1, max_length - 1)  # make sure local part < max_length
+        domain_part_length = randint(1, max_length - local_part_length)
 
         local_part = raw_email_localpart(local_part_length)
         domain_part = raw_hostname(domain_part_length)

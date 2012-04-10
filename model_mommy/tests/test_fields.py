@@ -18,11 +18,6 @@ class HandlingModelsWithUnsupportedFields(TestCase):
         self.assertRaises(TypeError, lambda: mommy.make_one(UnsupportedModel))
 
 
-class TestFillingFileFields(TestCase):
-    def test_create_model_with_file_field(self):
-        pass
-
-
 class TestFillingSlugField(TestCase):
     def is_slug(self, slug):
         import string
@@ -74,37 +69,6 @@ class TestFillingStringFields(TestCase):
             isinstance(dummy_text_model.text_field, basestring))
 
 
-class TestFillingEmailField(TestCase):
-    def test_create_model_with_email_field(self):
-        from model_mommy import mommy
-        from model_mommy.models import DummyEmailModel
-
-        dummy_email_model = mommy.make_one(DummyEmailModel)
-        email_field = DummyEmailModel._meta.get_field('email_field')
-
-        self.assertTrue(isinstance(email_field, EmailField))
-        self.assertTrue(
-            isinstance(dummy_email_model.email_field, basestring))
-
-    def test_if_generated_email_format_is_valid(self):
-        import re
-        import string
-
-        from model_mommy import mommy
-        from model_mommy.models import DummyEmailModel
-
-        dummy_email_model = mommy.make_one(DummyEmailModel)
-        data = dummy_email_model.email_field
-
-        table = string.letters + string.digits + "!#$%&'*+-/=?^_`{|}~."
-
-        m = re.match(r"[%(t)s]+@[%(t)s](\.[%(t)s]+)*" % {'t': table}, data)
-        self.assertTrue(m is not None)
-        self.assertTrue('..' not in data)
-        self.assertTrue(data[0] != '.')
-        self.assertTrue(data[-1] != '.')
-
-
 class TestFillingBooleanFields(TestCase):
     def test_create_model_with_BooleanField(self):
         from model_mommy import mommy
@@ -118,7 +82,7 @@ class TestFillingBooleanFields(TestCase):
             isinstance(dummy_boolean_model.boolean_field, bool))
 
 
-class TestFillingDateFields(TestCase):
+class TestFillingDateTimeFields(TestCase):
     def test_create_model_with_DateField(self):
         from model_mommy import mommy
         from model_mommy.models import DummyDateModel
@@ -132,8 +96,6 @@ class TestFillingDateFields(TestCase):
         self.assertTrue(
             isinstance(dummy_date_model.date_field, date))
 
-
-class TestFillingDateTimeFields(TestCase):
     def test_create_model_with_DateTimeField(self):
         from model_mommy import mommy
         from model_mommy.models import DummyDateTimeModel
@@ -146,6 +108,19 @@ class TestFillingDateTimeFields(TestCase):
         self.assertTrue(isinstance(datetime_field, DateTimeField))
         self.assertTrue(
             isinstance(dummy_datetime_model.datetime_field, date))
+
+    def test_create_model_with_TimeField(self):
+        from model_mommy import mommy
+        from model_mommy.models import DummyTimeModel
+
+        from datetime import date
+
+        dummy_time_model = mommy.make_one(DummyTimeModel)
+        time_field = dummy_time_model._meta.get_field('time_field')
+
+        self.assertTrue(isinstance(time_field, TimeField))
+        self.assertTrue(
+            isinstance(dummy_time_model.time_field, date))
 
 
 class TestFillingIntFields(TestCase):
@@ -245,17 +220,85 @@ class TestFillingOthersNumericFields(TestCase):
         self.assertTrue(isinstance(self.dummy_decimal_model.decimal_field, basestring))
 
 
+class TestFillingCommaSeparatedIntegerFields(TestCase):
+    def is_comma_separated_integer_field(self, value):
+        import re
+        regex = re.compile('^-?\d+(,-?\d+)*$')
+        return regex.match(value) is not None
+
+    def test_create_model_with_CommaSeparatedIntegerField(self):
+        from model_mommy import mommy
+        from model_mommy.models import DummyCommaSeparatedIntegerModel
+
+        self.comma_separated_model = mommy.make_one(DummyCommaSeparatedIntegerModel)
+        comma_separated_field = DummyCommaSeparatedIntegerModel._meta.get_field('comma_separated_integer_field')
+        field_value = self.comma_separated_model.comma_separated_integer_field
+
+        self.assertTrue(isinstance(comma_separated_field, CommaSeparatedIntegerField))
+        self.assertTrue(len(field_value) <= comma_separated_field.max_length)
+
+    def test_if_CommaSeparatedIntegerField_format_is_valid(self):
+        from model_mommy import mommy
+        from model_mommy.models import DummyCommaSeparatedIntegerModel
+
+        self.comma_separated_model = mommy.make_one(DummyCommaSeparatedIntegerModel)
+        field_value = self.comma_separated_model.comma_separated_integer_field
+
+        self.assertTrue(self.is_comma_separated_integer_field(field_value))
+
+
+class TestFillingIPAddressField(TestCase):
+    def is_ip_address_format_valid(self, value):
+        split = tuple(map(lambda v: int(v), value.split('.')))
+
+        if split == (0, 0, 0, 0):
+            return False
+        elif split[0] in (0, 10):
+            return False
+        elif split[-1] == 0:
+            return False
+        elif 255 in split:
+            return False
+        elif split[:1] == (192, 168):
+            return False
+        elif (172, 16, 0, 0) <= split <= (172, 31, 255, 255):
+            return False
+        else:
+            return True
+
+    def test_create_model_with_IPAddressField(self):
+        from model_mommy import mommy
+        from model_mommy.models import DummyIPAddressFieldModel
+
+        self.ip_address_model = mommy.make_one(DummyIPAddressFieldModel)
+        ip_address_field = DummyIPAddressFieldModel._meta.get_field('ip_address_field')
+        field_value = self.ip_address_model.ip_address_field
+
+        self.assertTrue(isinstance(ip_address_field, IPAddressField))
+        self.assertTrue(isinstance(field_value, basestring))
+
+    def test_if_IPAddressField_format_is_valid(self):
+        from model_mommy import mommy
+        from model_mommy.models import DummyIPAddressFieldModel
+
+        self.ip_address_model = mommy.make_one(DummyIPAddressFieldModel)
+        field_value = self.ip_address_model.ip_address_field
+
+        self.assertTrue(self.is_ip_address_format_valid(field_value))
+
+
 class TestFillingURLFields(TestCase):
     def test_create_model_with_URLField(self):
         from model_mommy import mommy
         from model_mommy.models import DummyURLModel
 
-        dummy_url_field = mommy.make_one(DummyURLModel)
-        url_field = dummy_url_field._meta.get_field('url_field')
+        dummy_url_model = mommy.make_one(DummyURLModel)
+        url_field = dummy_url_model._meta.get_field('url_field')
+        field_value = dummy_url_model.url_field
 
         self.assertTrue(isinstance(url_field, URLField))
-        self.assertTrue(
-            isinstance(dummy_url_field.url_field, basestring))
+        self.assertTrue(isinstance(field_value, basestring))
+        self.assertTrue(len(field_value) <= url_field.max_length)
 
 
 class TestFillingFileFields(TestCase):
@@ -265,10 +308,14 @@ class TestFillingFileFields(TestCase):
 
         dummy_file_model = mommy.make_one(DummyFileModel)
         file_field = dummy_file_model._meta.get_field('file_field')
+        field_value = dummy_file_model.file_field
+
+        field_value_len = len(unicode(field_value.name))
+        field_max_len = file_field.max_length
 
         self.assertTrue(isinstance(file_field, FileField))
-        self.assertTrue(
-            isinstance(dummy_file_model.file_field.url, basestring))
+        self.assertTrue(isinstance(field_value.name, basestring))
+        self.assertTrue(field_value_len <= field_max_len)
 
     def test_create_model_with_ImageField(self):
         from model_mommy import mommy
@@ -276,7 +323,40 @@ class TestFillingFileFields(TestCase):
 
         dummy_image_model = mommy.make_one(DummyImageModel)
         image_field = dummy_image_model._meta.get_field('image_field')
+        field_value = dummy_image_model.image_field
 
         self.assertTrue(isinstance(image_field, FileField))
-        self.assertTrue(
-            isinstance(dummy_image_model.image_field.url, basestring))
+        self.assertTrue(isinstance(field_value.name, basestring))
+        self.assertTrue(len(field_value.name) <= image_field.max_length)
+
+
+class TestFillingEmailField(TestCase):
+    def test_create_model_with_EmailField(self):
+        from model_mommy import mommy
+        from model_mommy.models import DummyEmailModel
+
+        dummy_email_model = mommy.make_one(DummyEmailModel)
+        email_field = DummyEmailModel._meta.get_field('email_field')
+        field_value = dummy_email_model.email_field
+
+        self.assertTrue(isinstance(email_field, EmailField))
+        self.assertTrue(isinstance(field_value, basestring))
+        self.assertTrue(len(field_value) <= email_field.max_length)
+
+    def test_if_EmailField_format_is_valid(self):
+        import re
+        import string
+
+        from model_mommy import mommy
+        from model_mommy.models import DummyEmailModel
+
+        dummy_email_model = mommy.make_one(DummyEmailModel)
+        data = dummy_email_model.email_field
+
+        table = string.letters + string.digits + "!#$%&'*+-/=?^_`{|}~."
+
+        m = re.match(r"[%(t)s]+@[%(t)s](\.[%(t)s]+)*" % {'t': table}, data)
+        self.assertTrue(m is not None)
+        self.assertTrue('..' not in data)
+        self.assertTrue(data[0] != '.')
+        self.assertTrue(data[-1] != '.')
