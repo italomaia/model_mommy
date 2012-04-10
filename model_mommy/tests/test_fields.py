@@ -9,11 +9,8 @@ from django.test import TestCase
 if django.VERSION < (1, 2):
     BigIntegerField = IntegerField
 
-from decimal import Decimal
-
 
 class HandlingModelsWithUnsupportedFields(TestCase):
-
     def test_unsupported_model_raises_an_explanatory_exception(self):
         from model_mommy import mommy
         from model_mommy.models import UnsupportedModel
@@ -22,13 +19,11 @@ class HandlingModelsWithUnsupportedFields(TestCase):
 
 
 class TestFillingFileFields(TestCase):
-
     def test_create_model_with_file_field(self):
         pass
 
 
 class TestFillingSlugField(TestCase):
-
     def is_slug(self, slug):
         import string
 
@@ -56,7 +51,6 @@ class TestFillingSlugField(TestCase):
 
 
 class TestFillingStringFields(TestCase):
-
     def test_create_model_with_CharField(self):
         from model_mommy import mommy
         from model_mommy.models import DummyCharModel
@@ -81,7 +75,6 @@ class TestFillingStringFields(TestCase):
 
 
 class TestFillingEmailField(TestCase):
-
     def test_create_model_with_email_field(self):
         from model_mommy import mommy
         from model_mommy.models import DummyEmailModel
@@ -113,7 +106,6 @@ class TestFillingEmailField(TestCase):
 
 
 class TestFillingBooleanFields(TestCase):
-
     def test_create_model_with_BooleanField(self):
         from model_mommy import mommy
         from model_mommy.models import DummyBooleanModel
@@ -127,7 +119,6 @@ class TestFillingBooleanFields(TestCase):
 
 
 class TestFillingDateFields(TestCase):
-
     def test_create_model_with_DateField(self):
         from model_mommy import mommy
         from model_mommy.models import DummyDateModel
@@ -143,7 +134,6 @@ class TestFillingDateFields(TestCase):
 
 
 class TestFillingDateTimeFields(TestCase):
-
     def test_create_model_with_DateTimeField(self):
         from model_mommy import mommy
         from model_mommy.models import DummyDateTimeModel
@@ -159,7 +149,6 @@ class TestFillingDateTimeFields(TestCase):
 
 
 class TestFillingIntFields(TestCase):
-
     def setUp(self):
         from model_mommy import mommy
         from model_mommy.models import DummyIntModel
@@ -201,22 +190,17 @@ class TestFillingIntFields(TestCase):
 
 
 class TestFillingPositiveIntFields(TestCase):
-
     def setUp(self):
         from model_mommy import mommy
         from model_mommy.models import DummyPositiveIntModel
 
-        self.dummy_positive_int_model =\
-            mommy.make_one(DummyPositiveIntModel)
+        self.dummy_positive_int_model = mommy.make_one(DummyPositiveIntModel)
 
     def test_create_model_with_PositiveSmallIntegerField(self):
         from model_mommy.models import DummyPositiveIntModel
 
-        positive_small_int = \
-            self.dummy_positive_int_model.positive_small_int_field
-
-        positive_small_int_field = DummyPositiveIntModel.\
-            _meta.get_field('positive_small_int_field')
+        positive_small_int = self.dummy_positive_int_model.positive_small_int_field
+        positive_small_int_field = DummyPositiveIntModel._meta.get_field('positive_small_int_field')
 
         self.assertTrue(isinstance(
             positive_small_int_field, PositiveSmallIntegerField))
@@ -230,18 +214,15 @@ class TestFillingPositiveIntFields(TestCase):
 
         positive_int = self.dummy_positive_int_model.positive_int_field
 
-        positive_int_field = DummyPositiveIntModel.\
-            _meta.get_field('positive_int_field')
+        positive_int_field = DummyPositiveIntModel._meta.get_field('positive_int_field')
 
         self.assertTrue(isinstance(positive_int_field, PositiveIntegerField))
-        self.assertTrue(isinstance(positive_int, int)\
-            or isinstance(positive_int, long))
+        self.assertTrue(isinstance(positive_int, int) or isinstance(positive_int, long))
         self.assertTrue(positive_int >= 0)
         self.assertTrue(positive_int <= 4294967295)
 
 
 class TestFillingOthersNumericFields(TestCase):
-
     def test_create_model_with_FloatField(self):
         from model_mommy import mommy
         from model_mommy.models import DummyNumbersModel
@@ -265,7 +246,6 @@ class TestFillingOthersNumericFields(TestCase):
 
 
 class TestFillingURLFields(TestCase):
-
     def test_create_model_with_URLField(self):
         from model_mommy import mommy
         from model_mommy.models import DummyURLModel
@@ -279,7 +259,6 @@ class TestFillingURLFields(TestCase):
 
 
 class TestFillingFileFields(TestCase):
-
     def test_create_model_with_FileField(self):
         from model_mommy import mommy
         from model_mommy.models import DummyFileModel

@@ -4,7 +4,6 @@ from django.test import TestCase
 
 
 class SimpleExtendMommy(TestCase):
-
     def test_simple_extended_mommy_example(self):
         from model_mommy.mommy import Mommy
         from model_mommy.models import Person
@@ -23,7 +22,6 @@ class SimpleExtendMommy(TestCase):
         max_age = 12
 
         class YoungPeopleMommy(Mommy):
-
             def value_for_agefield(self, field):
                 return randint(0, max_age)
 

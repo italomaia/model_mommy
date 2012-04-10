@@ -11,22 +11,22 @@ from random import randint, choice
 
 AUD_EXT_LIST = (
     '.aif', '.iff', '.mid', '.mp3', '.m4a', '.wav', '.wma'
-)
+    )
 
 DOC_EXT_LIST = (
     '.doc', '.docx', '.ppt', '.pps', '.rtf', '.tex', '.log',
     '.xsl', '.xml', '.odt', '.odp', '.txt'
-)
+    )
 
 IMG_EXT_LIST = (
     '.bmp', '.gif', '.jpg', '.png', '.psd', '.tga', '.tif',
     '.xcf'
-)
+    )
 
 VID_EXT_LIST = (
     '.3gp', '.asf', '.avi', '.flv', '.mov', '.mp4', '.mpg',
     '.rm', '.swf', '.vob', '.wmv', '.mkv'
-)
+    )
 
 FILE_EXT_LIST = AUD_EXT_LIST + DOC_EXT_LIST + IMG_EXT_LIST + VID_EXT_LIST
 
@@ -162,7 +162,7 @@ def raw_hostname(length, ext_list=None):
     assert length < 256, 'length is too big'
 
     if ext_list is not None:
-        assert max(map(lambda i: len(i), ext_list)) < length, \
+        assert max(map(lambda i: len(i), ext_list)) < length,\
         'length must be bigger than any provided extension'
 
     labels = []
@@ -185,4 +185,5 @@ def raw_hostname(length, ext_list=None):
 
 if __name__ == "__main__":
     import doctest
+
     doctest.testmod()

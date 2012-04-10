@@ -5,7 +5,6 @@ from django.db.models.fields.related import *
 
 
 class TestDummyRelationModel(TestCase):
-
     def test_model_has_no_fields_but_pk(self):
         from django.db.models.fields import AutoField
         from model_mommy.models import DummyRelationModel
@@ -17,15 +16,13 @@ class TestDummyRelationModel(TestCase):
 
 
 class TestFillingOneToOneField(TestCase):
-
     def test_create_model_with_OneToOneField(self):
         from model_mommy.models import DummyOneToOneModel
         from model_mommy.models import DummyRelationModel
         from model_mommy import mommy
 
         dummy_one_to_one_model = mommy.make_one(DummyOneToOneModel)
-        one_to_one_field = dummy_one_to_one_model.\
-            _meta.get_field('one_to_one_field')
+        one_to_one_field = dummy_one_to_one_model._meta.get_field('one_to_one_field')
 
         self.assertTrue(isinstance(one_to_one_field, OneToOneField))
         self.assertTrue(
@@ -34,15 +31,13 @@ class TestFillingOneToOneField(TestCase):
 
 
 class TestFillingForeignKey(TestCase):
-
     def test_create_model_with_ForeignKey(self):
         from model_mommy.models import DummyForeignKeyModel
         from model_mommy.models import DummyRelationModel
         from model_mommy import mommy
 
         dummy_foreignkey_model = mommy.make_one(DummyForeignKeyModel)
-        foreignkey_field = dummy_foreignkey_model.\
-            _meta.get_field('foreignkey_field')
+        foreignkey_field = dummy_foreignkey_model._meta.get_field('foreignkey_field')
 
         self.assertTrue(isinstance(foreignkey_field, ForeignKey))
         self.assertTrue(isinstance(
@@ -50,7 +45,6 @@ class TestFillingForeignKey(TestCase):
 
 
 class TestFillingM2MField(TestCase):
-
     def test_create_model_with_M2MField(self):
         """
         M2M fields should be populated manually.

@@ -19,7 +19,6 @@ class TestDjangoVersinoIssues(TestCase):
 
 
 class FieldFillingTestCase(TestCase):
-
     def setUp(self):
         from model_mommy import mommy
         from model_mommy.models import Person
@@ -28,7 +27,6 @@ class FieldFillingTestCase(TestCase):
 
 
 class FieldFillingWithParameterTestCase(TestCase):
-
     def test_simple_create_person_with_parameters(self):
         from model_mommy import mommy
         from model_mommy.models import Person
@@ -52,7 +50,6 @@ class FieldFillingWithParameterTestCase(TestCase):
 
 
 class TestMommyAPI(TestCase):
-
     def test_make_one_should_create_one_object(self):
         from model_mommy import mommy
         from model_mommy.models import Person
@@ -114,7 +111,6 @@ class TestMommyAPI(TestCase):
 
 
 class TestMommyModelsWithRelations(TestCase):
-
     def test_dependent_model_creation_with_ForeignKey(self):
         from model_mommy import mommy
         from model_mommy.models import Dog, Person
@@ -158,7 +154,6 @@ class TestMommyModelsWithRelations(TestCase):
 
 
 class TestAutoRefPattern(TestCase):
-
     def test_create_one_lone_penguin(self):
         from model_mommy import mommy
         from model_mommy.models import Penguin
@@ -192,7 +187,6 @@ class TestAutoRefPattern(TestCase):
 
 
 class FillNullablesTestCase(TestCase):
-
     def test_always_fill_nullables_if_value_provided_via_attrs(self):
         from model_mommy.mommy import Mommy
         from model_mommy.models import Person
@@ -222,7 +216,6 @@ class FillNullablesTestCase(TestCase):
 
 
 class FillingFromChoice(FieldFillingTestCase):
-
     def test_if_gender_is_populated_from_choices(self):
         from model_mommy.models import GENDER_CH
 
