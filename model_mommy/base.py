@@ -17,7 +17,7 @@ if not hasattr(__builtins__, 'long'):
     long = int  # python < 3.0
 
 
-class Base(object):
+class Mommy(object):
 
     def __init__(self, model, fill_null=None):
         """
@@ -393,7 +393,7 @@ class Base(object):
         """
         if not field.null:
             model = field.related.parent_model
-            base = Base(model)
+            base = self.__class__(model)
             return base.__make(field.commit)
 
     def value_for_onetoonefield(self, field):
@@ -403,7 +403,7 @@ class Base(object):
         """
         if not field.null:
             model = field.related.parent_model
-            base = Base(model)
+            base = self.__class__(model)
             return base.__make(field.commit)
 
     def value_for_manytomanyfield(self, field):

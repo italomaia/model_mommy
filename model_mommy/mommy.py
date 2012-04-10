@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 
-from .base import Base
+from .base import Mommy
 
 
 def make_one(model, **attrs):
@@ -50,8 +50,3 @@ def prepare_many(model, qty=5, **attrs):
 
     mommy = Mommy(model, fill_null=fill_null)
     return [mommy.prepare(**attrs) for i in range(qty)]
-
-
-class Mommy(Base):
-    def make_one(self, **kw):
-        return super(Mommy, self).make(**kw)

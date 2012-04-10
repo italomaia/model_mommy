@@ -43,7 +43,7 @@ class FieldFillingWithParameterTestCase(TestCase):
         from model_mommy.models import Person
 
         person_mom = Mommy(Person)
-        person = person_mom.make_one(happy=False,
+        person = person_mom.make(happy=False,
             age=20, gender='M', name='John')
         self.assertEqual(person.age, 20)
         self.assertEqual(person.happy, False)
@@ -199,7 +199,7 @@ class FillNullablesTestCase(TestCase):
 
         bio_data = 'some bio'
         mom = Mommy(Person, None)
-        p = mom.make_one(bio=bio_data)
+        p = mom.make(bio=bio_data)
         self.assertTrue(p.bio in (bio_data, None))
 
     def test_if_nullables_are_filled_when_fill_nullables_is_true(self):
@@ -208,7 +208,7 @@ class FillNullablesTestCase(TestCase):
 
         # force value for nullable fields
         mom = Mommy(Person, True)
-        p = mom.make_one()
+        p = mom.make()
         self.assertTrue(isinstance(p.bio, basestring))
 
     def test_if_nullables_are_not_filled_when_fill_nullables_is_false(self):
@@ -217,7 +217,7 @@ class FillNullablesTestCase(TestCase):
 
         # force None to nullable fields
         mom = Mommy(Person, False)
-        p = mom.make_one()
+        p = mom.make()
         self.assertEqual(p.bio, None)
 
 
