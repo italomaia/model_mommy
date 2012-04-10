@@ -9,7 +9,6 @@ from .utils import *
 from .constants import *
 
 import datetime
-from decimal import Decimal
 from random import random
 
 
@@ -18,7 +17,6 @@ if not hasattr(__builtins__, 'long'):
 
 
 class Mommy(object):
-
     def __init__(self, model, fill_null=None):
         """
         Keyword arguments:
