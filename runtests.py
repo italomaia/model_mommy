@@ -10,7 +10,14 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'test_settings'
 
 
 def runtests():
+    verbose_level = 1
     args = sys.argv[1:]
+
+    if '-v' in args:
+        index = args.index('-v')
+        _ = args.pop(index)
+        verbose_level = int(args.pop(index))
+
     if args:
         test_labels = ["model_mommy.%s" % arg for arg in args]
     else:
@@ -19,12 +26,12 @@ def runtests():
     try:
         from django.test.simple import run_tests
 
-        result = run_tests(test_labels, 1, True)
+        result = run_tests(test_labels, verbose_level, True)
         sys.exit(result)
     except ImportError:
         from django.test.simple import DjangoTestSuiteRunner
 
-        test_suite = DjangoTestSuiteRunner(1, True)
+        test_suite = DjangoTestSuiteRunner(verbose_level, True)
         result = test_suite.run_tests(test_labels)
         sys.exit(result)
 
