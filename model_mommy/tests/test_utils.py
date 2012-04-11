@@ -148,3 +148,18 @@ class TestUtilsRawHostnameMethods(TestCase):
         length = 33
         value = raw_hostname(length)
         self.assertLessEqual(len(value), length)
+
+    def test_raw_hostname_with_ext_list(self):
+        from model_mommy.utils import raw_hostname
+
+        ext_list = ['.com', '.com.br', '.org', '.org.br']
+        value = raw_hostname(12, ext_list)
+        self.assertTrue(any(map(lambda ext: value.endswith(ext), ext_list)))
+
+        ext_list = ['.com.br']
+        value = raw_hostname(12, ext_list)
+        self.assertTrue(value.endswith('.com.br'))
+
+        ext_list = ['com.br']
+        value = raw_hostname(12, ext_list)
+        self.assertTrue(value.endswith('.com.br'))
