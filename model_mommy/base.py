@@ -168,7 +168,7 @@ class Mommy(object):
         >>> assert value in (None, True, False), 'returned value is invalid'
 
         """
-        return choice((None, False, True))
+        return choice((False, True))  # nullbooleanfield ahs null=True by default
 
     def value_for_smallintegerfield(self, field):
         """
