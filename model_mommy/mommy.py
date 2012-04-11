@@ -6,8 +6,13 @@ from .base import Mommy
 def make_one(model, **attrs):
     """
     Creates a persisted instance from a given model its associated models.
-    It fill the fields with random values or you can specify
-    which fields you want to define its values by yourself.
+
+    Fields from the model instance are filled with random valid data
+    according with each type.
+
+    Keyword arguments:
+    fill_null -- set to True and no field shall be null. Set to false for
+    otherwise. Do not set and some null fields will be null, some won't.
 
     """
     fill_null = None
@@ -22,8 +27,13 @@ def prepare_one(model, **attrs):
     """
     Creates a BUT DOESN'T persist an instance from a given model
     its associated models.
-    It fill the fields with random values or you can specify
-    which fields you want to define its values by yourself.
+
+    Fields from the model instance are filled with random valid data
+    according with each type.
+
+    Keyword arguments:
+    fill_null -- set to True and no field shall be null. Set to false for
+    otherwise. Do not set and some null fields will be null, some won't.
 
     """
     fill_null = None
@@ -35,18 +45,33 @@ def prepare_one(model, **attrs):
 
 
 def make_many(model, qty=5, **attrs):
-    fill_null = None
-    if 'fill_null' in attrs:
-        fill_null = attrs.pop('fill_null')
+    """
+    Thin wrapper around make_one. Makes a list of model instances.
 
-    mommy = Mommy(model, fill_null=fill_null)
-    return [mommy.make(**attrs) for i in range(qty)]
+    Fields from the model instance are filled with random valid data
+    according with each type.
+
+    Keyword arguments:
+    fill_null -- set to True and no field shall be null. Set to false for
+    otherwise. Do not set and some null fields will be null, some won't.
+    qty -- how many instances you want.
+
+    """
+    return [make_one(model, **attrs) for i in range(qty)]
 
 
 def prepare_many(model, qty=5, **attrs):
-    fill_null = None
-    if 'fill_null' in attrs:
-        fill_null = attrs.pop('fill_null')
+    """
+    Thin wrapper around prepare_one. Makes a list of model instances,
+    but do not persist any.
 
-    mommy = Mommy(model, fill_null=fill_null)
-    return [mommy.prepare(**attrs) for i in range(qty)]
+    Fields from the model instance are filled with random valid data
+    according with each type.
+
+    Keyword arguments:
+    fill_null -- set to True and no field shall be null. Set to false for
+    otherwise. Do not set and some null fields will be null, some won't.
+    qty -- how many instances you want.
+
+    """
+    return [prepare_one(model, **attrs) for i in range(qty)]

@@ -63,7 +63,7 @@ class TestMommyAPI(TestCase):
         # makes sure it is the person we created
         self.assertEqual(Person.objects.all()[0].id, person.id)
 
-    def test_prepare_one_should_not_persist_one_object(self):
+    def test_prepare_one_should_create_but_not_persist_one_object(self):
         from model_mommy import mommy
         from model_mommy.models import Person
 
@@ -108,6 +108,77 @@ class TestMommyAPI(TestCase):
         # prepare_many creates 5 instances by default
         self.assertEqual(len(people), 5)
         self.assertEqual(Person.objects.count(), 0)
+
+    def test_prepare_many_people_with_params(self):
+        from model_mommy import mommy
+        from model_mommy.models import Person
+
+        people = mommy.prepare_many(Person, 3, name='Mike')
+
+        for person in people:
+            self.assertTrue(person.name, 'Mike')
+
+        self.assertEqual(Person.objects.count(), 0)
+
+    def test_make_one_object_with_fill_null_as_true(self):
+        from model_mommy import mommy
+        from model_mommy.models import Person
+
+        person = mommy.make_one(Person, fill_null=True)
+        meta = person._meta
+        fields = meta.fields
+
+        for field in fields:
+            name = field.name
+
+            if field.null:
+                field_value = getattr(person, name)
+                self.assertIsNotNone(field_value)
+
+    def test_prepare_one_object_with_fill_null_as_true(self):
+        from model_mommy import mommy
+        from model_mommy.models import Person
+
+        person = mommy.prepare_one(Person, fill_null=True)
+        meta = person._meta
+        fields = meta.fields
+
+        for field in fields:
+            name = field.name
+
+            if field.null:
+                field_value = getattr(person, name)
+                self.assertIsNotNone(field_value)
+
+    def test_make_one_object_with_fill_null_as_false(self):
+        from model_mommy import mommy
+        from model_mommy.models import Person
+
+        person = mommy.make_one(Person, fill_null=False)
+        meta = person._meta
+        fields = meta.fields
+
+        for field in fields:
+            name = field.name
+
+            if field.null:
+                field_value = getattr(person, name)
+                self.assertIsNone(field_value)
+
+    def test_prepare_one_object_with_fill_null_as_false(self):
+        from model_mommy import mommy
+        from model_mommy.models import Person
+
+        person = mommy.prepare_one(Person, fill_null=False)
+        meta = person._meta
+        fields = meta.fields
+
+        for field in fields:
+            name = field.name
+
+            if field.null:
+                field_value = getattr(person, name)
+                self.assertIsNone(field_value)
 
 
 class TestMommyModelsWithRelations(TestCase):
@@ -201,16 +272,17 @@ class FillNullablesTestCase(TestCase):
         from model_mommy.models import Person
 
         # force value for nullable fields
-        mom = Mommy(Person, True)
+        mom = Mommy(Person, fill_null=True)
         p = mom.make()
         self.assertTrue(isinstance(p.bio, basestring))
+
 
     def test_if_nullables_are_not_filled_when_fill_null_is_false(self):
         from model_mommy.mommy import Mommy
         from model_mommy.models import Person
 
         # force None to nullable fields
-        mom = Mommy(Person, False)
+        mom = Mommy(Person, fill_null=False)
         p = mom.make()
         self.assertEqual(p.bio, None)
 
