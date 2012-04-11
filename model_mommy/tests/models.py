@@ -121,6 +121,10 @@ class DummyFileModel(models.Model):
     file_field = FileField(upload_to='uploads')
 
 
+class DummyFilePathModel(models.Model):
+    file_path_field = FilePathField(path='uploads')
+
+
 class DummyImageModel(models.Model):
     image_field = ImageField(upload_to='images')
 

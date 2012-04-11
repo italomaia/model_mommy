@@ -321,11 +321,26 @@ class TestFillingFileFields(TestCase):
         file_field = dummy_file_model._meta.get_field('file_field')
         field_value = dummy_file_model.file_field
 
-        field_value_len = len(unicode(field_value.name))
+        field_value_len = len(field_value.name)
         field_max_len = file_field.max_length
 
         self.assertTrue(isinstance(file_field, FileField))
         self.assertTrue(isinstance(field_value.name, basestring))
+        self.assertTrue(field_value_len <= field_max_len)
+
+    def test_create_model_with_FilePathField(self):
+        from model_mommy import mommy
+        from model_mommy.models import DummyFilePathModel
+
+        dummy_file_path_model = mommy.make_one(DummyFilePathModel)
+        file_path_field = dummy_file_path_model._meta.get_field('file_path_field')
+        field_value = dummy_file_path_model.file_path_field
+
+        field_value_len = len(field_value)
+        field_max_len = file_path_field.max_length
+
+        self.assertTrue(isinstance(file_path_field, FilePathField))
+        self.assertTrue(isinstance(field_value, basestring))
         self.assertTrue(field_value_len <= field_max_len)
 
     def test_create_model_with_ImageField(self):
