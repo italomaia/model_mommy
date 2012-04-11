@@ -353,7 +353,7 @@ class Mommy(object):
 
         """
         length = randint(1, field.max_length)
-        return raw_filename(field.max_length, FILE_EXT_LIST)
+        return raw_filename(length, FILE_EXT_LIST)
 
     def value_for_imagefield(self, field):
         """
