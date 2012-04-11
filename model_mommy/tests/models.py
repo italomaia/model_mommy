@@ -47,6 +47,13 @@ class Penguin(models.Model):
     parcel = ManyToManyField('self', related_name='fellows', null=True)
 
 
+class Car(models.Model):
+    COLOR_CHOICES = ((0, 'white'), (1, 'black'), (2, 'red'))
+    color = IntegerField(default=0, choices=COLOR_CHOICES)
+    accessories = CharField(max_length=100, blank=True)
+    license_plate = CharField(max_length=10)
+
+
 class DummyDateModel(models.Model):
     date_field = DateField()
 
