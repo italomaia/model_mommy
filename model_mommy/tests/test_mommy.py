@@ -196,7 +196,7 @@ class FillNullablesTestCase(TestCase):
         p = mom.make(bio=bio_data)
         self.assertTrue(p.bio in (bio_data, None))
 
-    def test_if_nullables_are_filled_when_fill_nullables_is_true(self):
+    def test_if_nullables_are_filled_when_fill_null_is_true(self):
         from model_mommy.mommy import Mommy
         from model_mommy.models import Person
 
@@ -205,7 +205,7 @@ class FillNullablesTestCase(TestCase):
         p = mom.make()
         self.assertTrue(isinstance(p.bio, basestring))
 
-    def test_if_nullables_are_not_filled_when_fill_nullables_is_false(self):
+    def test_if_nullables_are_not_filled_when_fill_null_is_false(self):
         from model_mommy.mommy import Mommy
         from model_mommy.models import Person
 
