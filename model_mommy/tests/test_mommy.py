@@ -257,7 +257,26 @@ class TestAutoRefPattern(TestCase):
         self.assertEqual(parcel_count, all_but_me_count)
 
 
-class FillNullablesTestCase(TestCase):
+class TestModelWithBlankFields(TestCase):
+    def test_create_model_with_blank_field_and_no_default_set(self):
+        from model_mommy import mommy
+        from model_mommy.models import Car
+
+        car = mommy.make_one(Car)
+        self.assertTrue(isinstance(car.accessories, basestring))
+
+    def test_create_model_with_field_with_default_set(self):
+        from model_mommy import mommy
+        from model_mommy.models import Car
+
+        color_choices = Car.COLOR_CHOICES
+        color_choices_values = map(lambda opt: opt[0], color_choices)
+
+        car = mommy.make_one(Car)
+        self.assertIn(car.color, color_choices_values)
+
+
+class TestFillNullables(TestCase):
     def test_always_fill_nullables_if_value_provided_via_attrs(self):
         from model_mommy.mommy import Mommy
         from model_mommy.models import Person
@@ -265,7 +284,7 @@ class FillNullablesTestCase(TestCase):
         bio_data = 'some bio'
         mom = Mommy(Person, None)
         p = mom.make(bio=bio_data)
-        self.assertTrue(p.bio in (bio_data, None))
+        self.assertIn(p.bio, (bio_data, None))
 
     def test_if_nullables_are_filled_when_fill_null_is_true(self):
         from model_mommy.mommy import Mommy
@@ -287,7 +306,7 @@ class FillNullablesTestCase(TestCase):
         self.assertEqual(p.bio, None)
 
 
-class FillingFromChoice(FieldFillingTestCase):
+class TestFillingFromChoice(FieldFillingTestCase):
     def test_if_gender_is_populated_from_choices(self):
         from model_mommy.models import GENDER_CH
 

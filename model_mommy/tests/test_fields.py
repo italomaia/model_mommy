@@ -81,6 +81,17 @@ class TestFillingBooleanFields(TestCase):
         self.assertTrue(
             isinstance(dummy_boolean_model.boolean_field, bool))
 
+    def test_create_model_withNullBooleanField(self):
+        from model_mommy import mommy
+        from model_mommy.models import DummyNullBooleanModel
+
+        dummy_null_boolean_model = mommy.make_one(DummyNullBooleanModel)
+        null_boolean_field = DummyNullBooleanModel._meta.get_field('null_boolean_field')
+        field_value = dummy_null_boolean_model.null_boolean_field
+
+        self.assertTrue(isinstance(null_boolean_field, NullBooleanField))
+        self.assertIn(field_value, ('', None, True, False))
+
 
 class TestFillingDateTimeFields(TestCase):
     def test_create_model_with_DateField(self):
@@ -325,7 +336,7 @@ class TestFillingFileFields(TestCase):
         image_field = dummy_image_model._meta.get_field('image_field')
         field_value = dummy_image_model.image_field
 
-        self.assertTrue(isinstance(image_field, FileField))
+        self.assertTrue(isinstance(image_field, ImageField))
         self.assertTrue(isinstance(field_value.name, basestring))
         self.assertTrue(len(field_value.name) <= image_field.max_length)
 

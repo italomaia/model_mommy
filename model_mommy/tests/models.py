@@ -106,12 +106,16 @@ class DummyBooleanModel(models.Model):
     boolean_field = BooleanField()
 
 
+class DummyNullBooleanModel(models.Model):
+    null_boolean_field = NullBooleanField()
+
+
 class DummyFileModel(models.Model):
     file_field = FileField(upload_to='uploads')
 
 
 class DummyImageModel(models.Model):
-    image_field = FileField(upload_to='images')
+    image_field = ImageField(upload_to='images')
 
 
 class DummyIPAddressFieldModel(models.Model):
