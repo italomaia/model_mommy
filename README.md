@@ -143,7 +143,58 @@ the example above would look like this:
 
     assert(kid.wanted_games_qtd in int_range)
 
-The example above overwrites the behavior for the generator of all integerfields.
+The example above overwrites the behavior for the generator of all integer fields.
+
+## Recipes
+
+If you wish to test a model with specific values, you can simply pass the attribute values you wish set.
+
+    from model_mommy import mommy
+
+    person = mommy.make_one(Person, name='john', age=15)
+    assert person.name == 'john'
+    assert person.age == 15
+
+In the example above, your instance is guaranteed to have the attributes name and age set to 'john' and 15.
+Another approach would look like this:
+
+    from model_mommy import mommy
+
+    attrs = {'name': 'john', 'age': 15}
+    person = mommy.make_one(Person, **attrs)
+    assert person.name == 'john'
+    assert person.age == 15
+
+A third approach would look like this:
+
+    from model_mommy import mommy
+
+    def attrs():
+        return {'name': 'john', 'age': 15}
+
+    person = mommy.make_one(Person, **attrs())
+    assert person.name == 'john'
+    assert person.age == 15
+
+This third approach is useful if you wish to set distinct relation attributes, as a foreignkey, for many fields.
+An actual example:
+
+    from model_mommy import mommy
+
+    def attrs():
+        return {
+            'partner': mommy.make_one(Person)
+        }
+
+    # each person with a different partner
+    person_with_partner_1 =  mommy.make_one(Person, **attrs())
+    person_with_partner_2 =  mommy.make_one(Person, **attrs())
+    person_with_partner_3 =  mommy.make_one(Person, **attrs())
+
+The example above would not work with **make_many** and **prepare_many**
+as attrs is evaluated only once. In real code, you DO NOT WANT to do the
+above example with make/prepare_many as _random similar multiple_ data is usually
+a bad idea for testing.
 
 ## For contributors
 
