@@ -79,8 +79,11 @@ class Mommy(object):
             if field.name in attrs:
                 rt[field.name] = attrs[field.name]
 
-            elif flat and isinstance(field, RelatedField):
+            elif isinstance(field, RelatedField) and flat:
                 continue  # ignore non-provided related fields
+
+            elif isinstance(field, RelatedField) and field.null:
+                continue  # ignore nullable related fields
 
             elif type(field) in (AutoField, GenericRelation):
                 continue
@@ -98,13 +101,10 @@ class Mommy(object):
                     rt[field.name] = field.default
 
             else:
-                value = self.__get_value_for_field(field)
+                rt[field.name] = self.__get_value_for_field(field)
 
-                if value is not None:
-                    rt[field.name] = value
-
-                    if hasattr(value, 'save') and commit:
-                        value.save()
+                if hasattr(rt[field.name], 'save') and commit:
+                    rt[field.name].save()
 
         return rt
 
