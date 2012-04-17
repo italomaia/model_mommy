@@ -41,12 +41,12 @@ class Mommy(object):
         """
         return self.__make(False, **attrs)
 
-    def attrs(self, **attrs):
+    def attrs(self, flat, **attrs):
         """
         Returns all attributes (but related fields) required for a model.
 
         """
-        return self.__attrs(False, True, self.get_fields(), **attrs)
+        return self.__attrs(False, flat, self.get_fields(), **attrs)
 
     def get_fields(self):
         """
@@ -89,10 +89,10 @@ class Mommy(object):
                 continue
 
             elif field.null and (self.fill_null is False):
-                rt[field.name] = None
+                continue
 
             elif field.null and (self.fill_null is None) and choice(LEAVE_TO_CHANCE):
-                rt[field.name] = None
+                continue
 
             elif field.blank and choice(LEAVE_TO_CHANCE):
                 if field.default == NOT_PROVIDED:

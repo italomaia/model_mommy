@@ -196,7 +196,8 @@ class TestMommyAPI(TestCase):
                 type(field) in (AutoField, GenericRelation):
                 self.assertNotIn(field.name, attrs_keys)
             else:
-                self.assertIn(field.name, attrs_keys)
+                if not field.null:
+                    self.assertIn(field.name, attrs_keys)
 
     def test_make_attrs_with_params(self):
         from model_mommy import mommy
@@ -217,12 +218,18 @@ class TestMommyAPI(TestCase):
         from model_mommy.models import Person
 
         attrs = mommy.make_attrs(Person, fill_null=False)
+        attrs_keys = attrs.keys()
         meta = Person._meta
 
         for field in meta.fields:
-            self.assertIsNone(attrs[field.name])
+            if type(field) not in (AutoField, GenericRelation) and\
+               not isinstance(field, RelatedField):
+                    if field.null:
+                        self.assertNotIn(field.name, attrs_keys)
+                    else:
+                        self.assertIsNotNone(attrs[field.name])
 
-    def test_make_attrs_with_fill_as_false(self):
+    def test_make_attrs_with_fill_as_true(self):
         from model_mommy import mommy
         from model_mommy.models import Person
 
@@ -232,6 +239,18 @@ class TestMommyAPI(TestCase):
         for field in meta.fields:
             if field.null:
                 self.assertIsNotNone(attrs[field.name])
+
+
+class TestMommyClassAPI(TestCase):
+    def test_get_all_fields_method(self):
+        from model_mommy.base import Mommy
+        from model_mommy.models import Person
+
+        mommy = Mommy(Person)
+        all_fields = mommy.get_fields() + mommy.get_m2m_fields()
+        self.assertEqual(len(mommy.get_all_fields()), len(all_fields))
+
+
 
 class TestMommyModelsWithRelations(TestCase):
     def test_dependent_model_creation_with_ForeignKey(self):

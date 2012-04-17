@@ -92,4 +92,4 @@ def make_attrs(model, **attrs):
         fill_null = attrs.pop('fill_null')
 
     mommy = Mommy(model, fill_null)
-    return mommy.attrs(**attrs)
+    return mommy.attrs(True, **attrs)
