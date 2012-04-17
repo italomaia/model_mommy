@@ -41,6 +41,13 @@ class Mommy(object):
         """
         return self.__make(False, **attrs)
 
+    def attrs(self, **attrs):
+        """
+        Returns all attributes (but related fields) required for a model.
+
+        """
+        return self.__attrs(False, True, self.get_fields(), **attrs)
+
     def get_fields(self):
         """
         Returns all available fields, but m2m fields.
@@ -62,7 +69,7 @@ class Mommy(object):
         """
         return self.get_fields() + self.get_m2m_fields()
 
-    def __attrs(self, commit, fields, **attrs):
+    def __attrs(self, commit, flat, fields, **attrs):
         """
         """
         rt = {}
@@ -72,14 +79,17 @@ class Mommy(object):
             if field.name in attrs:
                 rt[field.name] = attrs[field.name]
 
+            elif flat and isinstance(field, RelatedField):
+                continue  # ignore non-provided related fields
+
             elif type(field) in (AutoField, GenericRelation):
                 continue
 
             elif field.null and (self.fill_null is False):
-                continue
+                rt[field.name] = None
 
             elif field.null and (self.fill_null is None) and choice(LEAVE_TO_CHANCE):
-                continue
+                rt[field.name] = None
 
             elif field.blank and choice(LEAVE_TO_CHANCE):
                 if field.default == NOT_PROVIDED:
@@ -88,12 +98,25 @@ class Mommy(object):
                     rt[field.name] = field.default
 
             else:
-                field.commit = commit
                 value = self.__get_value_for_field(field)
 
                 if value is not None:
                     rt[field.name] = value
 
+                    if hasattr(value, 'save') and commit:
+                        value.save()
+
+        return rt
+
+    def __m2m_attrs(self, fields, **attrs):
+        rt = {}
+
+        for field in fields:
+            # field value was provided. Ignoring...
+            if field.name in attrs:
+                rt[field.name] = attrs[field.name]
+            else:
+                rt[field.name] = self.__get_value_for_field(field)
         return rt
 
     def __make(self, commit, **attrs):
@@ -108,8 +131,8 @@ class Mommy(object):
 
         """
 
-        m2m_attrs = self.__attrs(commit, self.get_m2m_fields(), **attrs)
-        attrs = self.__attrs(commit, self.get_fields(), **attrs)
+        m2m_attrs = self.__m2m_attrs(self.get_m2m_fields(), **attrs)
+        attrs = self.__attrs(commit, False, self.get_fields(), **attrs)
 
         instance = self.model(**attrs)
 
@@ -405,7 +428,7 @@ class Mommy(object):
         if not field.null:
             model = field.related.parent_model
             base = self.__class__(model)
-            return base.__make(field.commit)
+            return base.__make(False)
 
     def value_for_onetoonefield(self, field):
         """
@@ -415,7 +438,7 @@ class Mommy(object):
         if not field.null:
             model = field.related.parent_model
             base = self.__class__(model)
-            return base.__make(field.commit)
+            return base.__make(False)
 
     def value_for_manytomanyfield(self, field):
         """

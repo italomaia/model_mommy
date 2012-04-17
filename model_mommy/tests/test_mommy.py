@@ -1,6 +1,8 @@
 # -*- coding:utf-8 -*-
 
 import django
+from django.contrib.contenttypes.generic import GenericRelation
+from django.db.models.fields.related import RelatedField
 from django.test import TestCase
 from django.db.models.fields import *
 
@@ -180,6 +182,56 @@ class TestMommyAPI(TestCase):
                 field_value = getattr(person, name)
                 self.assertIsNone(field_value)
 
+    def test_make_attrs_without_params(self):
+        from model_mommy import mommy
+        from model_mommy.models import Person
+
+        attrs = mommy.make_attrs(Person)
+        attrs_keys = attrs.keys()
+        meta = Person._meta
+        fields = meta.fields
+
+        for field in fields:  # no related field is created
+            if isinstance(field, RelatedField) or\
+                type(field) in (AutoField, GenericRelation):
+                self.assertNotIn(field.name, attrs_keys)
+            else:
+                self.assertIn(field.name, attrs_keys)
+
+    def test_make_attrs_with_params(self):
+        from model_mommy import mommy
+        from model_mommy.models import Person, GENDER_CH
+
+        attrs = mommy.make_attrs(Person,
+            name="John",
+            happy=True,
+            gender=GENDER_CH[0][0],
+            age=20)
+        self.assertEqual(attrs["name"], "John")
+        self.assertEqual(attrs["happy"], True)
+        self.assertEqual(attrs["gender"], GENDER_CH[0][0])
+        self.assertEqual(attrs["age"], 20)
+
+    def test_make_attrs_with_fill_as_false(self):
+        from model_mommy import mommy
+        from model_mommy.models import Person
+
+        attrs = mommy.make_attrs(Person, fill_null=False)
+        meta = Person._meta
+
+        for field in meta.fields:
+            self.assertIsNone(attrs[field.name])
+
+    def test_make_attrs_with_fill_as_false(self):
+        from model_mommy import mommy
+        from model_mommy.models import Person
+
+        attrs = mommy.make_attrs(Person, fill_null=True)
+        meta = Person._meta
+
+        for field in meta.fields:
+            if field.null:
+                self.assertIsNotNone(attrs[field.name])
 
 class TestMommyModelsWithRelations(TestCase):
     def test_dependent_model_creation_with_ForeignKey(self):

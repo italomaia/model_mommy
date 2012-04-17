@@ -75,3 +75,21 @@ def prepare_many(model, qty=5, **attrs):
 
     """
     return [prepare_one(model, **attrs) for i in range(qty)]
+
+
+def make_attrs(model, **attrs):
+    """
+    Returns all attributes (but m2m fields) required for a model.
+    Nothing is committed.
+
+    Keyword arguments:
+    fill_null -- set to True and no field shall be null. Set to false for
+    otherwise. Do not set and some null fields will be null, some won't.
+
+    """
+    fill_null = None
+    if 'fill_null' in attrs:
+        fill_null = attrs.pop('fill_null')
+
+    mommy = Mommy(model, fill_null)
+    return mommy.attrs(**attrs)
