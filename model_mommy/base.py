@@ -62,21 +62,15 @@ class Mommy(object):
         """
         return self.get_fields() + self.get_m2m_fields()
 
-    def __make(self, commit, **attrs):
+    def __attrs(self, commit, fields, **attrs):
         """
-        If attribute value is provided in attrs, it is not overwritten.
-        AutoField and GenericRelation fields are ignored.
-        Nullable OneToOne, ForeignKey and ManyToMany fields are ignored.
-
-        Keyword arguments:
-        commit (bool) -- Should instance be commited?
-        attrs (dict) -- pre-defined instance values
-
         """
-        for field in self.get_all_fields():
+        rt = {}
+
+        for field in fields:
             # field value was provided. Ignoring...
             if field.name in attrs:
-                continue
+                rt[field.name] = attrs[field.name]
 
             elif type(field) in (AutoField, GenericRelation):
                 continue
@@ -89,22 +83,33 @@ class Mommy(object):
 
             elif field.blank and choice(LEAVE_TO_CHANCE):
                 if field.default == NOT_PROVIDED:
-                    attrs[field.name] = ''
+                    rt[field.name] = ''
                 else:
-                    attrs[field.name] = field.default
+                    rt[field.name] = field.default
 
             else:
                 field.commit = commit
                 value = self.__get_value_for_field(field)
 
                 if value is not None:
-                    attrs[field.name] = value
+                    rt[field.name] = value
 
-        m2m_attrs = {}
+        return rt
 
-        for field in self.get_m2m_fields():
-            if field.name in attrs:
-                m2m_attrs[field.name] = attrs.pop(field.name)
+    def __make(self, commit, **attrs):
+        """
+        If attribute value is provided in attrs, it is not overwritten.
+        AutoField and GenericRelation fields are ignored.
+        Nullable OneToOne, ForeignKey and ManyToMany fields are ignored.
+
+        Keyword arguments:
+        commit (bool) -- Should instance be commited?
+        attrs (dict) -- pre-defined instance values
+
+        """
+
+        m2m_attrs = self.__attrs(commit, self.get_m2m_fields(), **attrs)
+        attrs = self.__attrs(commit, self.get_fields(), **attrs)
 
         instance = self.model(**attrs)
 
