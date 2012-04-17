@@ -42,9 +42,9 @@ class Store(models.Model):
     employees = ManyToManyField(Person, related_name='employers')
 
 
-class Penguin(models.Model):
+class Penguin(models.Model):  # a family animal...
     partner = OneToOneField('self', related_name='mate', null=True)
-    parcel = ManyToManyField('self', related_name='fellows', null=True)
+    parcel = ManyToManyField('self', related_name='fellows')
 
 
 class Car(models.Model):
