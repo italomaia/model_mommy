@@ -71,8 +71,17 @@ class Mommy(object):
 
     def __attrs(self, commit, flat, fields, **attrs):
         """
+        Returns all fields, but m2m fields, used to populate a model. You can
+        use this method directly to create fake form data.
+
+        Arguments:
+        commit -- should related fields be commited?
+        flat -- should related fields be ignored?
+        fields -- which fields should be created?
+        **attrs -- optional defined values for fields
+
         """
-        rt = {}
+        rt = {}  # return value / values for fields
 
         for field in fields:
             # field value was provided. Ignoring...
@@ -252,11 +261,8 @@ class Mommy(object):
         """
         md, dp = field.max_digits, field.decimal_places
 
-        dp_length = dp
-        md_length = md - dp
-
-        md_number = ''.join([str(randint(0, 9)) for i in range(md_length)])
-        dp_number = ''.join([str(randint(0, 9)) for i in range(dp_length)])
+        md_number = ''.join([str(randint(0, 9)) for i in range(md - dp)])
+        dp_number = ''.join([str(randint(0, 9)) for i in range(dp)])
 
         return "%s.%s" % (md_number, dp_number)
 
