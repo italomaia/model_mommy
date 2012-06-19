@@ -82,7 +82,7 @@ How's that?
 
 ## Note 2
 
-An field with blank=True or declared default value has a 25% chance of being left blank
+A field with blank=True or declared default value has a 25% chance of being left blank
 or with the default value. Same behavior goes for fields with null=True.
 
 ## Not so Basic Usage

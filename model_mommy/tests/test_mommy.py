@@ -10,7 +10,7 @@ if django.VERSION < (1, 2):
     BigIntegerField = IntegerField
 
 
-class TestDjangoVersinoIssues(TestCase):
+class TestDjangoVersionIssues(TestCase):
     def test_if_bigintegerfield_works_for_v1_1(self):
         from model_mommy.models import BigIntegerField
 
