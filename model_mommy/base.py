@@ -45,6 +45,9 @@ class Mommy(object):
         """
         Returns all attributes (but related fields) required for a model.
 
+        Arguments:
+        flat -- should related fields be ignored?
+
         """
         return self.__attrs(False, flat, self.get_fields(), **attrs)
 
