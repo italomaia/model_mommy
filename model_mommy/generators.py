@@ -97,6 +97,10 @@ def gen_boolean():
     return choice((True, False))
 
 
+def value_for_nullbooleanfield():
+    return choice((True, False))  # nullbooleanfield has null=True by default
+
+
 def gen_url():
     return 'http://www.%s.com' % gen_string(30)
 
