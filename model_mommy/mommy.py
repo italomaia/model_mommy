@@ -82,11 +82,11 @@ make_many.required = foreign_key_required
 default_mapping = {
     BooleanField: generators.gen_boolean,
     IntegerField: generators.gen_integer,
-    BigIntegerField: generators.gen_integer,
-    SmallIntegerField: generators.gen_integer,
+    BigIntegerField: generators.gen_big_integer,
+    SmallIntegerField: generators.gen_small_integer,
 
-    PositiveIntegerField: lambda: generators.gen_integer(0),
-    PositiveSmallIntegerField: lambda: generators.gen_integer(0),
+    PositiveIntegerField: generators.gen_positive_integer,
+    PositiveSmallIntegerField: generators.gen_positive_small_integer,
 
     FloatField: generators.gen_float,
     DecimalField: generators.gen_decimal,
