@@ -53,8 +53,24 @@ def gen_from_choices(C):
     return gen_from_list(choice_list)
 
 
-def gen_integer(min_int=-MAX_INT, max_int=MAX_INT):
+def gen_small_integer():
+    return randint(MIN_SMALL_INT, MAX_SMALL_INT)
+
+
+def gen_positive_small_integer():
+    return randint(0, MAX_SMALL_INT)
+
+
+def gen_integer(min_int=MIN_INT, max_int=MAX_INT):
     return randint(min_int, max_int)
+
+
+def gen_positive_integer():
+    return randint(0, MAX_INT)
+
+
+def gen_big_integer():
+    return randint(MIN_BIG_INT, MAX_BIG_INT)
 
 
 def gen_float():
@@ -62,9 +78,13 @@ def gen_float():
 
 
 def gen_decimal(max_digits, decimal_places):
-    num_as_str = lambda x: ''.join([str(randint(0, 9)) for i in range(x)])
-    return Decimal("%s.%s" % (num_as_str(max_digits - decimal_places),
-                              num_as_str(decimal_places)))
+    md, dp = max_digits, decimal_places
+
+    md_number = ''.join([str(randint(0, 9)) for i in range(md - dp)])
+    dp_number = ''.join([str(randint(0, 9)) for i in range(dp)])
+
+    return Decimal("%s.%s" % (md_number, dp_number))
+
 gen_decimal.required = ['max_digits', 'decimal_places']
 
 gen_date = datetime.date.today
