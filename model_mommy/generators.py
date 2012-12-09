@@ -10,6 +10,8 @@ callable (which will receive `field` as first argument), it should return a
 list in the format (key, value) where key is the argument name for generator
 and value is the value for that argument.
 """
+
+from .constants import *
 import datetime
 from django import VERSION
 from decimal import Decimal
@@ -20,11 +22,6 @@ from os.path import abspath, join, dirname
 from random import randint, choice, random
 import string
 
-
-MAX_LENGTH = 300
-# Using sys.maxint here breaks a bunch of tests when running against a
-# Postgres database.
-MAX_INT = 10000
 
 def get_content_file(content, name):
     if VERSION[1] < 4:
@@ -90,7 +87,7 @@ def gen_slug(max_length=50):
 
 
 def gen_text():
-    return gen_string(MAX_LENGTH)
+    return gen_string(TEXT_MAX_LENGTH)
 
 
 def gen_boolean():
