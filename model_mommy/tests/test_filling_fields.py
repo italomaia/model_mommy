@@ -134,7 +134,7 @@ class FillingIntFields(TestCase):
         big_int_field = DummyIntModel._meta.get_field('big_int_field')
         self.assertIsInstance(big_int_field, BigIntegerField)
 
-        self.assertIsInstance(self.dummy_int_model.big_int_field, int)
+        self.assertTrue(type(self.dummy_int_model.big_int_field) in (int, long))
 
     def test_fill_SmallIntegerField_with_a_random_number(self):
 
