@@ -1,10 +1,10 @@
 # Note about Mommy
-Mommy uses fuzzy testing techniques. If you don't know what that is,
+This fork of Model Mommy uses fuzzy testing for data generation. If you don't know what that is,
 read here: http://en.wikipedia.org/wiki/Fuzz_testing
 
 # Creating objects for testing shouldn't hurt
 
-model_mommy is a tool for creating good model objects for testing in Django, inspired in ruby's ObjectDaddy and FactoryGirl.
+Model Mommy is a tool for creating good model objects for testing in Django, inspired in ruby's ObjectDaddy and FactoryGirl.
 
 All values are basically generated according to the django model field type using instrospection.
 
