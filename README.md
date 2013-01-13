@@ -4,8 +4,9 @@ read here: http://en.wikipedia.org/wiki/Fuzz_testing
 
 # Creating objects for testing shouldn't hurt
 
-model_mommy is a tool for creating objects for testing in Django, inspired in ruby's ObjectDaddy and FactoryGirl.
-It generate the values according with the field type, but i will add support to custom values as well.
+model_mommy is a tool for creating good model objects for testing in Django, inspired in ruby's ObjectDaddy and FactoryGirl.
+
+All values are basically generated according to the django model field type using instrospection.
 
 #Installing
 
@@ -31,9 +32,14 @@ just call mommy =):
 
     kid = mommy.make_one(Kid)
 
+and your object is created! No boring attribute passing like 'foobar' every damn time. You
+can check your generated model like this:
 
-and your object is created! No boring attributes passing like 'foobar' every damn time.
-
+    assert kid.happy in (True or False)
+    >>> True
+    assert isinstance(kid.name, basestring)
+    >>> True
+    ... etc
 
 mommy also handles relationships. Suppose the kid has a dog:
 
@@ -41,30 +47,32 @@ mommy also handles relationships. Suppose the kid has a dog:
         owner = models.ForeignKey('Kid')
         kind = models.CharField(max_length=50, blank=True)
 
-when you do:
+let's create a dog:
 
     rex = mommy.make_one(Dog)
 
-it will also create the Kid, automatically.
+the Kid instance will be created automatically.
 
 You can also specify values for one or more attribute.
 
     another_kid = mommy.make_one(Kid, age=3)
-    assert another_kid.age == 3
+    assert another_kid.age == 3  # all other kid attribute values are random
 
-But, if don't need a persisted object, mommy can handle this for you as well:
+In both examples above, the kid and rex objects are persisted in the database.
+If you don't need a persisted object, mommy can handle this for you as well:
 
     from model_mommy import mommy
     from model_mommy.models import Kid
 
     kid = mommy.prepare_one(Kid)
+    assert Kid.objects.count() == 0
 
-It works like make_one, but it doesn't persist the instance nor related fields.
+It works like make_one, but it doesn't persist the instance **nor** related fields.
 
 ## Note 1
 
-ForeignKey and OneToOne fields are not populated by default if null=True. This behavior
-helps avoiding problems with recursive loops and the "diamond effect".
+Related fields are not populated by default if not required (null=True). This behavior
+helps avoiding problems like recursive loops and the "diamond effect".
 
 How's that?
 
@@ -82,7 +90,7 @@ How's that?
 
 ## Note 2
 
-A field with blank=True or declared default value has a 25% chance of being left blank
+A field with blank=True or with a declared default value has a 25% chance of being left blank
 or with the default value. Same behavior goes for fields with null=True.
 
 ## Not so Basic Usage
@@ -101,8 +109,9 @@ Model instances can also be generated from Mommy factories. Make your mass produ
     assert isinstance(second_kid, Kid)
     assert isinstance(third_kid, Kid)
 
-Note that this kind of construction is more efficient than mommy.make_one(Model),
-so, if you need to create a lot of instances, this might be a nice approach, or...
+This kind of construction is more efficient than mommy.make_one(Model).
+So, if you need to create a lot of instances of the same model, this
+approach is good for you, or...
 
     from model_mommy.mommy import Mommy
     from model_mommy.models import Kid
@@ -151,7 +160,8 @@ The example above overwrites the behavior for the generator of all integer field
 
 ## Recipes
 
-If you wish to test a model with specific values, you can simply pass the attribute values you wish set.
+If you wish to test a model with a set of specific values, you can simply pass
+the attribute values you wish to the building method.
 
     from model_mommy import mommy
 
@@ -180,7 +190,8 @@ A third approach would look like this:
     assert person.name == 'john'
     assert person.age == 15
 
-This third approach is useful if you wish to set distinct relation attributes, as a foreignkey, for many fields.
+This third approach is useful if you wish to set distinct relation attributes,
+as a foreignkey, for many fields.
 An actual example:
 
     from model_mommy import mommy
@@ -202,21 +213,24 @@ a bad idea for testing.
 
 ## For contributors
 
-If you want to contribute with model_mommy, fork the project. Here are a few guidelines for you:
+If you want to contribute, fork the project and send your fixes. Here are a few guidelines for you:
 
  * Write tests for all code you commit (untested code might be refused)
- * Check your tests coverage
+ * Check your code coverage
  * Follow pep8 guidelines
 
 For more examples, see tests.
 
-You can also override the type_mapping, if you want to all values from a given Field to be populate with a value you prefer.
-To it like this:
+You can also override the value type mapping, if you want all values from a given Field to be populate with a value you prefer.
 
-    class TimeCopMommy(Mommy):
-        def __init__(self, model, fill_nullables=True):
-            super(Mommy, self).__init__(model, fill_nullables)
-            self.type_mapping[DateField] = datetime.date(2011, 02, 02)
+Do it like this:
+
+    from random import randint
+    from model_mommy import Mommy
+
+    class MyMommy(Mommy):
+        def value_for_integerfield(self, field):
+            return randint(0, 126)
 
 ## Doubts? Loved it? Hated it? Suggestions?
 
