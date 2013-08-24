@@ -1,18 +1,22 @@
-# Note about Mommy
-This fork of Model Mommy uses fuzzy testing for data generation. If you don't know what that is,
-read here: http://en.wikipedia.org/wiki/Fuzz_testing
+# About ModelMommy
 
-# Creating objects for testing shouldn't hurt
+Model Mommy is a tool for creating model objects for testing in Django, inspired in ruby's
+ObjectDaddy and FactoryGirl. All values are basically generated according to the django model
+field type using introspection.
 
-Model Mommy is a tool for creating good model objects for testing in Django, inspired in ruby's ObjectDaddy and FactoryGirl.
+# About This Fork
 
-All values are basically generated according to the django model field type using instrospection.
+This fork uses fuzzy for data generation. This means that there are no artificial
+limitation to the range of values for a field. This approach helps to ensure
+consistence in your code.
+
+For more on Fuzzy Testing, read: http://en.wikipedia.org/wiki/Fuzz_testing
 
 Install
 =======
 
 ```shell
-    pip install model_mommy
+pip install model_mommy
 ```
 
 ## Basic Usage
@@ -53,9 +57,9 @@ assert isinstance(kid.name, basestring)
 mommy also handles relationships. Suppose the kid has a dog:
 
 ```python
-    class Dog(models.Model):
-        owner = models.ForeignKey('Kid')
-        kind = models.CharField(max_length=50, blank=True)
+class Dog(models.Model):
+    owner = models.ForeignKey('Kid')
+    kind = models.CharField(max_length=50, blank=True)
 ```
 
 let's create a dog:
