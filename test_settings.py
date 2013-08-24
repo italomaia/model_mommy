@@ -10,7 +10,7 @@ DATABASE_ENGINE = 'sqlite3'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.%s' % DATABASE_ENGINE,
-        },
     }
+}
 
 SITE_ID = 1
