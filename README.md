@@ -8,73 +8,81 @@ Model Mommy is a tool for creating good model objects for testing in Django, ins
 
 All values are basically generated according to the django model field type using instrospection.
 
-Installing
-==========
+Install
+=======
 
-.. code-block:: console
+```shell
     pip install model_mommy
+```
 
 ## Basic Usage
 
 If you have a model like this in your app:
 
-.. code-block:: python
-    class Kid(models.Model):
-        happy = models.BooleanField()
-        name = models.CharField(max_length=30)
-        age = models.IntegerField()
-        bio = models.TextField()
-        wanted_games_qtd = models.BigIntegerField()
-        birthday = models.DateField()
-        appointment = models.DateTimeField()
+```python
+class Kid(models.Model):
+    happy = models.BooleanField()
+    name = models.CharField(max_length=30)
+    age = models.IntegerField()
+    bio = models.TextField()
+    wanted_games_qtd = models.BigIntegerField()
+    birthday = models.DateField()
+    appointment = models.DateTimeField()
+```
 
 just call mommy =):
 
-.. code-block:: python
-    from model_mommy import mommy
-    from model_mommy.models import Kid
+```python
+from model_mommy import mommy
+from model_mommy.models import Kid
 
-    kid = mommy.make_one(Kid)
+kid = mommy.make_one(Kid)
+```
 
 and your object is created! No boring attribute passing like 'foobar' every damn time. You
 can check your generated model like this:
 
-.. code-block:: python
-    assert kid.happy in (True or False)
-    >>> True
-    assert isinstance(kid.name, basestring)
-    >>> True
-    ... etc
+```python
+assert kid.happy in (True or False)
+>>> True
+assert isinstance(kid.name, basestring)
+>>> True
+... etc
+```
 
 mommy also handles relationships. Suppose the kid has a dog:
 
-.. code-block:: python
+```python
     class Dog(models.Model):
         owner = models.ForeignKey('Kid')
         kind = models.CharField(max_length=50, blank=True)
+```
 
 let's create a dog:
 
-.. code-block:: python
-    rex = mommy.make_one(Dog)
+```python
+rex = mommy.make_one(Dog)
+```
 
 the Kid instance will be created automatically.
 
 You can also specify values for one or more attribute.
 
-.. code-block:: python
-    another_kid = mommy.make_one(Kid, age=3)
-    assert another_kid.age == 3  # all other kid attribute values are random
+```python
+another_kid = mommy.make_one(Kid, age=3)
+assert another_kid.age == 3  # all other kid attribute values are random
+```
 
 In both examples above, the kid and rex objects are persisted in the database.
 If you don't need a persisted object, mommy can handle this for you as well:
 
-.. code-block:: python
-    from model_mommy import mommy
-    from model_mommy.models import Kid
+```python
+from model_mommy import mommy
+from model_mommy.models import Kid
 
-    kid = mommy.prepare_one(Kid)
-    assert Kid.objects.count() == 0
+kid = mommy.prepare_one(Kid)
+assert Kid.objects.count() == 0
+```
 
 It works like make_one, but it doesn't persist the instance **nor** related fields.
 
@@ -85,18 +93,19 @@ helps avoiding problems like recursive loops and the "diamond effect".
 
 How's that?
 
-.. code-block:: python
-    from django.db.models import Model
-    from model_mommy import mommy
+```python
+from django.db.models import Model
+from model_mommy import mommy
 
-    class Person(Model):
-        gender = models.CharField(max_length=1, choices=((0, 'M'), (1, 'F'))
-        name = models.CharField(max_length=100)
-        age = models.IntegerField()
-        partner = models.ForeignKey('Person', null=True)
+class Person(Model):
+    gender = models.CharField(max_length=1, choices=((0, 'M'), (1, 'F'))
+    name = models.CharField(max_length=100)
+    age = models.IntegerField()
+    partner = models.ForeignKey('Person', null=True)
 
-    person = mommy.make(Person)
-    assert person.partner is None
+person = mommy.make(Person)
+assert person.partner is None
+```
 
 ## Note 2
 
@@ -107,30 +116,32 @@ or with the default value. Same behavior goes for fields with null=True.
 
 Model instances can also be generated from Mommy factories. Make your mass producer mom like this:
 
-.. code-block:: python
-    from model_mommy.mommy import Mommy
-    from model_mommy.models import Kid
+```python
+from model_mommy.mommy import Mommy
+from model_mommy.models import Kid
 
-    mom = Mommy(Kid)
-    first_kid = mom.make()
-    second_kid = mom.make()
-    third_kid = mom.make()
+mom = Mommy(Kid)
+first_kid = mom.make()
+second_kid = mom.make()
+third_kid = mom.make()
 
-    assert isinstance(first_kid, Kid)
-    assert isinstance(second_kid, Kid)
-    assert isinstance(third_kid, Kid)
+assert isinstance(first_kid, Kid)
+assert isinstance(second_kid, Kid)
+assert isinstance(third_kid, Kid)
+```
 
 This kind of construction is more efficient than mommy.make_one(Model).
 So, if you need to create a lot of instances of the same model, this
 approach is good for you, or...
 
-.. code-block:: python
-    from model_mommy.mommy import Mommy
-    from model_mommy.models import Kid
+```python
+from model_mommy.mommy import Mommy
+from model_mommy.models import Kid
 
-    mom = Mommy(Kid)
-    kids = mom.make_many(3)
-    assert len(kids) == 3
+mom = Mommy(Kid)
+kids = mom.make_many(3)
+assert len(kids) == 3
+```
 
 ## Extending Mommy
 
@@ -141,34 +152,36 @@ generator, you must extend the Mommy class to get this behavior.
 
 Let's see a example:
 
-.. code-block:: python
-    class BabyMommy(Mommy):
-        def value_for_agefield(self, field):
-            return 0
+```python
+class BabyMommy(Mommy):
+    def value_for_agefield(self, field):
+        return 0
 
-    mom = BabeMommy(Kid)
-    baby = mom.make_one()
-    assert(baby.age == 0)
+mom = BabeMommy(Kid)
+baby = mom.make_one()
+assert(baby.age == 0)
+```
 
 The naming convention for the generator methods is **value_for_<fieldname>field** and
 **value_for_<fieldtype>**. If you want to overwrite the behavior for a field type,
 the example above would look like this:
 
-.. code-block:: python
-    from random import choice
-    from model_mommy.models import Kid
-    from model_mommy.mommy import Mommy
+```python
+from random import choice
+from model_mommy.models import Kid
+from model_mommy.mommy import Mommy
 
-    int_range = range(0, 10)
+int_range = range(0, 10)
 
-    class CustomMommy(Mommy):
-        def value_for_integerfield(self, field):
-            return choice(int_range)
+class CustomMommy(Mommy):
+    def value_for_integerfield(self, field):
+        return choice(int_range)
 
-    mom = CustomMommy(Kid)
-    kid = mom.make_one()
+mom = CustomMommy(Kid)
+kid = mom.make_one()
 
-    assert(kid.wanted_games_qtd in int_range)
+assert(kid.wanted_games_qtd in int_range)
+```
 
 The example above overwrites the behavior for the generator of all integer fields.
 
@@ -177,52 +190,56 @@ The example above overwrites the behavior for the generator of all integer field
 If you wish to test a model with a set of specific values, you can simply pass
 the attribute values you wish to the building method.
 
-.. code-block:: python
-    from model_mommy import mommy
+```python
+from model_mommy import mommy
 
-    person = mommy.make_one(Person, name='john', age=15)
-    assert person.name == 'john'
-    assert person.age == 15
+person = mommy.make_one(Person, name='john', age=15)
+assert person.name == 'john'
+assert person.age == 15
+```
 
 In the example above, your instance is guaranteed to have the attributes name and age set to 'john' and 15.
 Another approach would look like this:
 
-.. code-block:: python
-    from model_mommy import mommy
+```python
+from model_mommy import mommy
 
-    attrs = {'name': 'john', 'age': 15}
-    person = mommy.make_one(Person, **attrs)
-    assert person.name == 'john'
-    assert person.age == 15
+attrs = {'name': 'john', 'age': 15}
+person = mommy.make_one(Person, **attrs)
+assert person.name == 'john'
+assert person.age == 15
+```
 
 A third approach would look like this:
 
-.. code-block:: python
-    from model_mommy import mommy
+```python
+from model_mommy import mommy
 
-    def attrs():
-        return {'name': 'john', 'age': 15}
+def attrs():
+    return {'name': 'john', 'age': 15}
 
-    person = mommy.make_one(Person, **attrs())
-    assert person.name == 'john'
-    assert person.age == 15
+person = mommy.make_one(Person, **attrs())
+assert person.name == 'john'
+assert person.age == 15
+```
 
 This third approach is useful if you wish to set distinct relation attributes,
 as a foreignkey, for many fields.
 An actual example:
 
-.. code-block:: python
-    from model_mommy import mommy
+```python
+from model_mommy import mommy
 
-    def attrs():
-        return {
-            'partner': mommy.make_one(Person)
-        }
+def attrs():
+    return {
+        'partner': mommy.make_one(Person)
+    }
 
-    # each person with a different partner
-    person_with_partner_1 =  mommy.make_one(Person, **attrs())
-    person_with_partner_2 =  mommy.make_one(Person, **attrs())
-    person_with_partner_3 =  mommy.make_one(Person, **attrs())
+# each person with a different partner
+person_with_partner_1 =  mommy.make_one(Person, **attrs())
+person_with_partner_2 =  mommy.make_one(Person, **attrs())
+person_with_partner_3 =  mommy.make_one(Person, **attrs())
+```
 
 The example above would not work with **make_many** and **prepare_many**
 as attrs is evaluated only once. In real code, you DO NOT WANT to do the
